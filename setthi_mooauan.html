@@ -1738,12 +1738,12 @@
 
       return (
         <div className="min-h-screen flex flex-col pb-20">
-          {/* Header */}
-          <header className="sticky top-0 z-40 backdrop-blur-md bg-white/75 border-b border-pink-100 shadow-xs">
-            <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+          {/* Header (Clean, Compact, No-wrap Mobile Optimized) */}
+          <header className="sticky top-0 z-40 backdrop-blur-md bg-white/85 border-b border-slate-200/80 shadow-xs">
+            <div className="max-w-lg mx-auto px-3.5 py-2.5 flex items-center justify-between gap-2">
               {/* Logo & App Name */}
-              <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-2xl bg-pink-100 flex items-center justify-center shadow-xs overflow-hidden p-0.5 border-2 border-pink-200">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-8 h-8 rounded-xl bg-pink-100 flex items-center justify-center shadow-xs overflow-hidden p-0.5 border border-pink-200 shrink-0">
                   <img
                     src={`./mascots/${isBoy ? 'maxnum' : 'manow'}_icon.png`}
                     alt="Icon"
@@ -1751,26 +1751,23 @@
                     onError={(e) => { e.target.style.display = 'none'; }}
                   />
                 </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <h1 className="text-base sm:text-lg font-black text-slate-800">เศรษฐีหมูอ้วน</h1>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full text-white ${isBoy ? 'bg-sky-500' : 'bg-pink-500'}`}>
-                      {currentUser.name}
-                    </span>
-                  </div>
-                  <p className="text-[10px] text-slate-400 font-medium">บันทึกสินค้า & สลิปบัญชี</p>
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <h1 className="text-sm font-black text-slate-800 whitespace-nowrap">เศรษฐีหมูอ้วน</h1>
+                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full text-white truncate max-w-[85px] ${isBoy ? 'bg-sky-500' : 'bg-pink-500'}`}>
+                    {isBoy ? 'Maxnum' : 'Manow'}
+                  </span>
                 </div>
               </div>
 
               {/* Header Right Actions: Streak, Settings & Logout */}
-              <div className="flex items-center gap-2">
-                <div className="px-2 py-1 rounded-full text-[11px] font-black bg-amber-50 text-amber-600 border border-amber-200 flex items-center gap-1">
+              <div className="flex items-center gap-1.5 shrink-0">
+                <div className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-50 text-amber-600 border border-amber-200 whitespace-nowrap">
                   🔥 3 วัน
                 </div>
 
                 <button
                   onClick={() => setShowSettings(true)}
-                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 tap-bounce"
+                  className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 text-xs tap-bounce shrink-0"
                   title="ตั้งค่า"
                 >
                   ⚙️
@@ -1778,17 +1775,17 @@
 
                 <button
                   onClick={handleLogout}
-                  className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-600 border border-slate-200 tap-bounce"
+                  className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-600 border border-slate-200 flex items-center justify-center text-xs tap-bounce shrink-0"
                   title="ออกจากระบบ"
                 >
-                  🚪 ออก
+                  🚪
                 </button>
               </div>
             </div>
           </header>
 
-          {/* View Mode Switcher (Home vs Chat vs Stats) */}
-          <div className="max-w-2xl w-full mx-auto px-4 pt-3">
+          {/* View Mode Switcher (Desktop / Tablet view) */}
+          <div className="hidden sm:block max-w-lg w-full mx-auto px-4 pt-3">
             <div className="flex bg-white/70 p-1 rounded-2xl border border-slate-200 gap-1 shadow-xs">
               <button
                 onClick={() => setActiveTab('home')}
@@ -1827,7 +1824,7 @@
           </div>
 
           {/* Main Layout */}
-          <main className="max-w-2xl w-full mx-auto p-4 space-y-4 flex-1">
+          <main className="max-w-lg w-full mx-auto px-3.5 py-3 space-y-3.5 flex-1 pb-24">
             {activeTab === 'stats' ? (
               <StatsView transactions={transactions} isBoy={isBoy} cardClass={cardClass} />
             ) : activeTab === 'chat' ? (
@@ -1843,43 +1840,43 @@
               />
             ) : (
               <div className="space-y-4 animate-in fade-in">
-                {/* Date Navigator */}
-                <div className={`p-3 ${cardClass} flex items-center justify-between shadow-xs`}>
+                {/* Date Navigator (Sleek Compact Bar) */}
+                <div className="px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/90 shadow-2xs flex items-center justify-between text-xs">
                   <button
                     onClick={() => shiftDate(-1)}
-                    className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 tap-bounce"
+                    className="w-7 h-7 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-500 tap-bounce"
                   >
                     ◀
                   </button>
-                  <div className="text-center cursor-pointer" onClick={() => setSelectedDate(today)}>
-                    <div className="text-xs font-bold text-slate-400">
-                      {selectedDate === today ? '✨ วันนี้' : 'ย้อนหลัง'}
-                    </div>
-                    <div className="text-sm font-black text-slate-700">
+                  <div className="text-center cursor-pointer flex items-center gap-1.5" onClick={() => setSelectedDate(today)}>
+                    <span className="text-[11px] font-bold text-pink-500">
+                      {selectedDate === today ? '✨ วันนี้' : 'ย้อนหลัง'}:
+                    </span>
+                    <span className="font-black text-slate-700 text-xs">
                       {new Date(selectedDate).toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
-                    </div>
+                    </span>
                   </div>
                   <button
                     onClick={() => shiftDate(1)}
-                    className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 tap-bounce"
+                    className="w-7 h-7 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-500 tap-bounce"
                   >
                     ▶
                   </button>
                 </div>
 
-                {/* Quick AI Chat Input Bar */}
-                <div className={`p-3.5 ${cardClass} border-2 ${isBoy ? 'border-sky-300' : 'border-pink-300'} space-y-2 shadow-sm`}>
+                {/* Quick AI Chat Input Bar (Sleek Compact Bar) */}
+                <div className={`p-3 ${cardClass} border-2 ${isBoy ? 'border-sky-300' : 'border-pink-300'} space-y-2 shadow-sm`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-base">💬</span>
-                      <h3 className="text-xs font-black text-slate-800">หมูอ้วนช่วยจด AI (พิมพ์ปุ๊บ บันทึกปั๊บ)</h3>
+                      <span className="text-sm">💬</span>
+                      <h3 className="text-xs font-black text-slate-800">หมูอ้วนช่วยจด AI</h3>
                     </div>
                     <button
                       onClick={() => setActiveTab('chat')}
-                      className={`text-[11px] font-bold ${isBoy ? 'text-sky-600' : 'text-pink-600'} hover:underline flex items-center gap-1`}
+                      className={`text-[10px] font-bold ${isBoy ? 'text-sky-600' : 'text-pink-600'} hover:underline flex items-center gap-1`}
                     >
-                      <span>เปิดห้องแชท</span>
-                      <span>💬</span>
+                      <span>ห้องแชทเต็มจอ</span>
+                      <span>→</span>
                     </button>
                   </div>
 
@@ -1976,87 +1973,92 @@
                   </div>
                 </div>
 
-                {/* Mascot Stage & Daily Benchmark Card */}
-                <div className={`p-5 ${cardClass} relative overflow-hidden`}>
-                  <div className="flex items-center justify-between gap-3">
+                {/* Mascot Stage & Daily Benchmark Card (Streamlined) */}
+                <div className={`p-4 ${cardClass} relative overflow-hidden space-y-3`}>
+                  <div className="flex items-center justify-between gap-2.5">
                     {/* Left: Mascot & Quote */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <PigMascot
                         level={mascotLevel}
                         isBoy={isBoy}
-                        size="lg"
+                        size="md"
                         onClick={() => {
                           setMascotRerollSeed(s => s + 1);
                           confetti({ particleCount: 25, spread: 40 });
                         }}
                       />
-                      <div>
-                        <div className="flex items-center gap-1.5 mb-0.5">
-                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full text-white ${isBoy ? 'bg-sky-500' : 'bg-pink-500'}`}>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full text-white whitespace-nowrap ${isBoy ? 'bg-sky-500' : 'bg-pink-500'}`}>
                             น้องหมูอ้วน
                           </span>
-                          <span className="text-[10px] text-slate-400 font-bold cursor-pointer hover:underline" onClick={() => setMascotRerollSeed(s => s + 1)}>
+                          <button
+                            type="button"
+                            onClick={() => setMascotRerollSeed(s => s + 1)}
+                            className="text-[9px] text-slate-400 font-bold hover:text-slate-700 whitespace-nowrap bg-slate-100 px-1.5 py-0.5 rounded-full"
+                          >
                             🎲 สลับรูป
-                          </span>
+                          </button>
                         </div>
-                        <p className="text-xs sm:text-sm font-bold text-slate-700 leading-snug max-w-[170px] sm:max-w-xs">
+                        <p className="text-xs font-bold text-slate-700 leading-tight">
                           {dayExpense > dailyBenchmark 
-                            ? 'อู๊ดๆ! วันนี้ช้อปเกินเกณฑ์วันไปแล้วนะพี่มนุษย์ เพลาๆ หน่อย!'
-                            : 'วันนี้เศรษฐีหมูอ้วนคอยเฝ้ากระปุกให้อยู่นะอู๊ด!'
+                            ? 'อู๊ดๆ! วันนี้ช้อปเกินเกณฑ์วันไปแล้วนะ เพลาๆ หน่อย!'
+                            : 'เศรษฐีหมูอ้วนคอยเฝ้ากระปุกให้อยู่นะอู๊ด!'
                           }
                         </p>
                       </div>
                     </div>
 
                     {/* Right: Circular Progress for Daily Benchmark */}
-                    <CircularProgress
-                      value={dayExpense}
-                      max={dailyBenchmark}
-                      size={92}
-                      strokeWidth={8}
-                      color={dayExpense > dailyBenchmark ? '#ef4444' : primaryColor}
-                      bgColor={primaryBgColor}
-                      label="เกณฑ์วัน"
-                    />
+                    <div className="shrink-0">
+                      <CircularProgress
+                        value={dayExpense}
+                        max={dailyBenchmark}
+                        size={78}
+                        strokeWidth={7}
+                        color={dayExpense > dailyBenchmark ? '#ef4444' : primaryColor}
+                        bgColor={primaryBgColor}
+                        label="เกณฑ์วัน"
+                      />
+                    </div>
                   </div>
 
-                  {/* Benchmark & Spending Sub-metrics */}
-                  <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-slate-100 text-xs">
-                    <div className="bg-slate-50/80 rounded-2xl p-2.5 border border-slate-100 text-center">
-                      <span className="text-[10px] text-slate-400 block font-medium">จ่ายวันนี้ (เกณฑ์ ฿{dailyBenchmark})</span>
-                      <span className={`font-mono font-black text-sm ${dayExpense > dailyBenchmark ? 'text-rose-500' : 'text-slate-700'}`}>
-                        ฿{dayExpense.toFixed(2)}
+                  {/* Benchmark & Spending Sub-metrics (Compact Strip) */}
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs">
+                    <div className="bg-slate-50/90 rounded-xl px-2.5 py-1.5 border border-slate-100 flex items-center justify-between">
+                      <span className="text-[10px] text-slate-400 font-bold">จ่ายวันนี้</span>
+                      <span className={`font-mono font-black text-xs ${dayExpense > dailyBenchmark ? 'text-rose-500' : 'text-slate-700'}`}>
+                        ฿{dayExpense.toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                       </span>
                     </div>
-                    <div className="bg-slate-50/80 rounded-2xl p-2.5 border border-slate-100 text-center">
-                      <span className="text-[10px] text-slate-400 block font-medium">รับวันนี้</span>
-                      <span className="font-mono font-black text-sm text-emerald-600">
-                        +฿{dayIncome.toFixed(2)}
+                    <div className="bg-slate-50/90 rounded-xl px-2.5 py-1.5 border border-slate-100 flex items-center justify-between">
+                      <span className="text-[10px] text-slate-400 font-bold">รับวันนี้</span>
+                      <span className="font-mono font-black text-xs text-emerald-600">
+                        +฿{dayIncome.toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Monthly Income & Spending Cap Card */}
-                <div className={`p-4 ${cardClass} space-y-3`}>
-                  <div className="flex items-center justify-between">
+                {/* Monthly Income & Spending Cap Card (Compact & Clear) */}
+                <div className={`p-3.5 ${cardClass} space-y-2.5`}>
+                  <div className="flex items-center justify-between text-xs">
                     <div>
-                      <span className="text-[10px] font-bold text-slate-400 block">ภาพรวมประจำเดือน</span>
-                      <h3 className="text-sm font-black text-slate-800">
+                      <h3 className="font-black text-slate-800 leading-none">
                         {new Date(selectedDate).toLocaleDateString('th-TH', { month: 'long', year: 'numeric' })}
                       </h3>
                     </div>
                     <div className="text-right">
-                      <span className="text-[10px] font-bold text-slate-400 block">ขีดจำกัดงบรายจ่าย</span>
-                      <span className="text-xs font-mono font-black text-slate-700">
-                        ใช้ไป ฿{monthExpense.toLocaleString()} / ฿{monthlyLimit.toLocaleString()}
+                      <span className="text-[10px] text-slate-400 font-bold">งบ: </span>
+                      <span className="font-mono font-black text-slate-700 text-xs">
+                        ฿{monthExpense.toLocaleString()} / ฿{monthlyLimit.toLocaleString()}
                       </span>
                     </div>
                   </div>
 
                   {/* Monthly Limit Progress Bar */}
                   <div className="space-y-1">
-                    <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden p-0.5">
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all duration-700 ${
                           monthExpense > monthlyLimit ? 'bg-rose-500' : 'bg-candy-pink'
@@ -2066,33 +2068,33 @@
                     </div>
                     <div className="flex justify-between text-[10px] font-bold text-slate-400">
                       <span>ใช้ไปแล้ว {Math.round((monthExpense / monthlyLimit) * 100)}%</span>
-                      <span>
+                      <span className={monthlyLimitRemaining >= 0 ? 'text-slate-500' : 'text-rose-500'}>
                         {monthlyLimitRemaining >= 0 
-                          ? `เหลืองบใช้ได้อีก ฿${monthlyLimitRemaining.toLocaleString()}`
-                          : `เกินขีดจำกัดงบ ฿${Math.abs(monthlyLimitRemaining).toLocaleString()}`
+                          ? `เหลืองบ ฿${monthlyLimitRemaining.toLocaleString()}`
+                          : `เกินงบ ฿${Math.abs(monthlyLimitRemaining).toLocaleString()}`
                         }
                       </span>
                     </div>
                   </div>
 
-                  {/* Monthly KPI 3-Column Summary */}
-                  <div className="grid grid-cols-3 gap-2 pt-1 border-t border-slate-100 text-[11px] text-center">
-                    <div className="bg-slate-50/80 rounded-xl p-2 border border-slate-100">
-                      <span className="text-[10px] text-slate-400 block font-medium">รายรับจริง</span>
-                      <span className="font-mono font-black text-emerald-600 text-xs">
-                        +฿{monthIncome.toFixed(0)}
+                  {/* Monthly KPI 3-Column Summary (Inline Mini Cards) */}
+                  <div className="grid grid-cols-3 gap-1.5 pt-1 border-t border-slate-100 text-center">
+                    <div className="bg-slate-50/90 rounded-xl p-1.5 border border-slate-100">
+                      <span className="text-[9px] text-slate-400 block font-bold leading-tight">รับจริง</span>
+                      <span className="font-mono font-black text-emerald-600 text-xs leading-tight">
+                        +฿{monthIncome.toLocaleString('th-TH', { maximumFractionDigits: 0 })}
                       </span>
                     </div>
-                    <div className="bg-slate-50/80 rounded-xl p-2 border border-slate-100">
-                      <span className="text-[10px] text-slate-400 block font-medium">รายจ่ายสะสม</span>
-                      <span className="font-mono font-black text-rose-500 text-xs">
-                        -฿{monthExpense.toFixed(0)}
+                    <div className="bg-slate-50/90 rounded-xl p-1.5 border border-slate-100">
+                      <span className="text-[9px] text-slate-400 block font-bold leading-tight">จ่ายสะสม</span>
+                      <span className="font-mono font-black text-rose-500 text-xs leading-tight">
+                        -฿{monthExpense.toLocaleString('th-TH', { maximumFractionDigits: 0 })}
                       </span>
                     </div>
-                    <div className="bg-slate-50/80 rounded-xl p-2 border border-slate-100">
-                      <span className="text-[10px] text-slate-400 block font-medium">เงินเก็บสุทธิ</span>
-                      <span className={`font-mono font-black text-xs ${netSavings < 0 ? 'text-rose-500' : 'text-emerald-600'}`}>
-                        {netSavings < 0 ? '-' : '+'}฿{Math.abs(netSavings).toFixed(0)}
+                    <div className="bg-slate-50/90 rounded-xl p-1.5 border border-slate-100">
+                      <span className="text-[9px] text-slate-400 block font-bold leading-tight">เงินเก็บสุทธิ</span>
+                      <span className={`font-mono font-black text-xs leading-tight ${netSavings < 0 ? 'text-rose-500' : 'text-emerald-600'}`}>
+                        {netSavings < 0 ? '-' : '+'}฿{Math.abs(netSavings).toLocaleString('th-TH', { maximumFractionDigits: 0 })}
                       </span>
                     </div>
                   </div>
@@ -2136,46 +2138,52 @@
                       {dateTxns.map((t) => (
                         <div
                           key={t.id}
-                          className="flex items-center justify-between p-3 rounded-2xl bg-slate-50/80 hover:bg-slate-100/80 border border-slate-100 transition-colors group"
+                          className="flex items-center justify-between p-3 rounded-2xl bg-slate-50/90 hover:bg-slate-100/90 border border-slate-100 transition-colors gap-2.5"
                         >
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center text-xl shadow-xs border border-slate-100">
+                          {/* Left: Category Icon + Merchant & Meta */}
+                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                            <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center text-lg shadow-xs border border-slate-100 shrink-0">
                               {getCategoryInfo(t.category, t.type).icon}
                             </div>
-                            <div>
-                              <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                                <span>{t.merchant || t.category}</span>
-                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
-                                  t.type === 'INCOME' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
-                                }`}>
-                                  {t.type === 'INCOME' ? 'รายรับ' : 'รายจ่าย'}
-                                </span>
+                            <div className="min-w-0 flex-1">
+                              <div className="text-xs font-bold text-slate-800 truncate leading-tight">
+                                {t.merchant || t.category}
                               </div>
-                              <div className="text-[10px] text-slate-400 flex items-center gap-2">
-                                <span>{t.time || 'ไม่ระบุเวลา'}</span>
+                              <div className="text-[10px] text-slate-400 flex items-center gap-1 truncate mt-0.5">
+                                <span className="shrink-0">{t.time || 'วันนี้'}</span>
                                 <span>•</span>
-                                <span>{t.category}</span>
+                                <span className="truncate">{t.category}</span>
                                 {t.wallet && (
                                   <>
                                     <span>•</span>
-                                    <span>{t.wallet}</span>
+                                    <span className="truncate">{t.wallet}</span>
                                   </>
                                 )}
                               </div>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2.5">
-                            <span className={`font-mono font-black text-sm ${t.type === 'INCOME' ? 'text-emerald-600' : 'text-rose-500'}`}>
-                              {t.type === 'INCOME' ? '+' : '-'}฿{t.amount.toFixed(2)}
-                            </span>
-                            <button
-                              onClick={() => handleDelete(t.id)}
-                              className="text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity p-1"
-                              title="ลบรายการ"
-                            >
-                              ✕
-                            </button>
+                          {/* Right: Amount + Badge (Zero Wrapping / Overlapping) */}
+                          <div className="shrink-0 text-right">
+                            <div className={`font-mono font-black text-xs sm:text-sm whitespace-nowrap leading-tight ${
+                              t.type === 'INCOME' ? 'text-emerald-600' : 'text-rose-500'
+                            }`}>
+                              {t.type === 'INCOME' ? '+' : '-'}฿{Number(t.amount || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </div>
+                            <div className="mt-1 flex items-center justify-end gap-1.5">
+                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap ${
+                                t.type === 'INCOME' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200/60' : 'bg-rose-50 text-rose-600 border border-rose-200/60'
+                              }`}>
+                                {t.type === 'INCOME' ? 'รายรับ' : 'รายจ่าย'}
+                              </span>
+                              <button
+                                onClick={() => handleDelete(t.id)}
+                                className="w-5 h-5 rounded-full text-slate-300 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center text-[10px] font-bold transition-colors"
+                                title="ลบรายการ"
+                              >
+                                ✕
+                              </button>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -2402,6 +2410,60 @@
               </div>
             </div>
           )}
+
+
+          {/* Mobile Bottom Navigation Dock (iOS / Android Native Pattern) */}
+          <nav className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-lg sm:hidden">
+            <div className="max-w-md mx-auto px-6 py-1.5 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setActiveTab('home')}
+                className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all ${
+                  activeTab === 'home'
+                    ? isBoy ? 'text-sky-600 font-black' : 'text-pink-600 font-black'
+                    : 'text-slate-400 font-bold hover:text-slate-600'
+                }`}
+              >
+                <span className="text-lg">🏠</span>
+                <span className="text-[10px]">หน้าหลัก</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowScanner(true)}
+                className={`w-11 h-11 -mt-4 rounded-full ${primaryBtnClass} text-white shadow-candy flex items-center justify-center text-lg tap-bounce border-3 border-white shrink-0`}
+                title="สแกนสลิป"
+              >
+                📸
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('chat')}
+                className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all ${
+                  activeTab === 'chat'
+                    ? isBoy ? 'text-sky-600 font-black' : 'text-pink-600 font-black'
+                    : 'text-slate-400 font-bold hover:text-slate-600'
+                }`}
+              >
+                <span className="text-lg">💬</span>
+                <span className="text-[10px]">ช่วยจด</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('stats')}
+                className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all ${
+                  activeTab === 'stats'
+                    ? isBoy ? 'text-sky-600 font-black' : 'text-pink-600 font-black'
+                    : 'text-slate-400 font-bold hover:text-slate-600'
+                }`}
+              >
+                <span className="text-lg">📊</span>
+                <span className="text-[10px]">สถิติ</span>
+              </button>
+            </div>
+          </nav>
 
           {/* Large Image Preview Modal */}
           {previewSlipImage && (
