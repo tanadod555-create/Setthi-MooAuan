@@ -1441,10 +1441,10 @@
       const [showScanner, setShowScanner] = useState(false);
       const [showManualAdd, setShowManualAdd] = useState(false);
       const [manualType, setManualType] = useState('EXPENSE');
-      const [scanType, setScanType] = useState('EXPENSE');
       const [isScanning, setIsScanning] = useState(false);
-      const [parsedSlip, setParsedSlip] = useState(null);
-      const [imagePreview, setImagePreview] = useState(null);
+      const [scanProgress, setScanProgress] = useState(null); // { current, total, status, fileName }
+      const [parsedSlips, setParsedSlips] = useState([]); // Array of parsed slips for batch scanning
+      const [previewSlipImage, setPreviewSlipImage] = useState(null);
 
       // Sync user data when switching or logging in
       useEffect(() => {
@@ -1513,18 +1513,29 @@
         setSelectedDate(current.toISOString().split('T')[0]);
       };
 
-      // Gemini Vision OCR for Slip & Receipt
-      const handleImageFile = async (file) => {
-        if (!file) return;
+      // Multi-Image Batch Scanner (Gemini Vision OCR)
+      const handleMultipleImageFiles = async (fileList) => {
+        if (!fileList || fileList.length === 0) return;
+        const files = Array.from(fileList);
         const apiKey = settings.geminiApiKey || DEFAULT_GEMINI_KEY;
 
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          const base64Data = e.target.result;
-          setImagePreview(base64Data);
-          setIsScanning(true);
+        setIsScanning(true);
+        setScanProgress({ current: 0, total: files.length, status: 'reading', fileName: '' });
+
+        const newParsed = [];
+
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          setScanProgress({ current: i + 1, total: files.length, status: 'analyzing', fileName: file.name });
 
           try {
+            const base64Data = await new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = (e) => resolve(e.target.result);
+              reader.onerror = reject;
+              reader.readAsDataURL(file);
+            });
+
             const cleanBase64 = base64Data.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, '');
             const prompt = `
 คุณคือ AI ผู้ช่วยตรวจสอบสลิปโอนเงินธนาคารไทย และใบเสร็จสินค้าของแอป "เศรษฐีหมูอ้วน"
@@ -1570,27 +1581,101 @@
               }
             }
 
-            if (!parsed) {
-              throw new Error('All models failed');
+            if (parsed) {
+              newParsed.push({
+                tempId: `slip-${Date.now()}-${i}-${Math.random().toString(36).substr(2, 4)}`,
+                imagePreview: base64Data,
+                type: parsed.type === 'INCOME' ? 'INCOME' : 'EXPENSE',
+                amount: Number(parsed.amount) || 0,
+                merchant: parsed.merchant || (parsed.type === 'INCOME' ? 'รายรับ' : 'ไม่ระบุชื่อ'),
+                category: parsed.suggestedCategory || (parsed.type === 'INCOME' ? 'รายรับพิเศษ / อื่นๆ' : 'อาหารและเครื่องดื่ม'),
+                wallet: parsed.bank || 'สลิป',
+                note: parsed.note || 'สแกนจากสลิป/ใบเสร็จ',
+                slipRef: parsed.slipRef || '',
+                datetime: parsed.datetime || ''
+              });
+            } else {
+              newParsed.push({
+                tempId: `slip-${Date.now()}-${i}`,
+                imagePreview: base64Data,
+                type: 'EXPENSE',
+                amount: 0,
+                merchant: file.name.replace(/\.[^/.]+$/, ""),
+                category: 'อาหารและเครื่องดื่ม',
+                wallet: 'สลิป',
+                note: 'สแกนจากรูปภาพ',
+                slipRef: '',
+                datetime: ''
+              });
             }
-
-            setScanType(parsed.type === 'INCOME' ? 'INCOME' : 'EXPENSE');
-            setParsedSlip(parsed);
           } catch (err) {
-            console.error(err);
-            alert('ไม่สามารถอ่านสลิปด้วย AI ได้ กรุณาตรวจสอบรูปภาพ หรือกรอกข้อมูลด้วยตนเอง');
-            setParsedSlip({
-              merchant: 'ไม่ระบุชื่อ',
-              amount: 0.0,
-              suggestedCategory: 'อาหารและเครื่องดื่ม',
-              note: '',
-              slipRef: ''
-            });
-          } finally {
-            setIsScanning(false);
+            console.error(`Error processing file ${file.name}:`, err);
           }
-        };
-        reader.readAsDataURL(file);
+        }
+
+        setParsedSlips(prev => [...prev, ...newParsed]);
+        setIsScanning(false);
+        setScanProgress(null);
+      };
+
+      const updateSlipItem = (tempId, field, val) => {
+        setParsedSlips(prev => prev.map(s => s.tempId === tempId ? { ...s, [field]: val } : s));
+      };
+
+      const removeSlipItem = (tempId) => {
+        setParsedSlips(prev => prev.filter(s => s.tempId !== tempId));
+      };
+
+      const handleSaveAllBatchSlips = async () => {
+        if (!parsedSlips || parsedSlips.length === 0) return;
+
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+
+        const newTxns = parsedSlips.map((item, idx) => {
+          let dateStr = selectedDate;
+          if (item.datetime && item.datetime.includes('-')) {
+            const parts = item.datetime.split(' ')[0];
+            if (/^\d{4}-\d{2}-\d{2}$/.test(parts)) dateStr = parts;
+          }
+          return {
+            id: `TXN-SLIP-${Date.now()}-${idx}`,
+            user: currentUser.username,
+            date: dateStr,
+            time: item.datetime && item.datetime.includes(' ') ? item.datetime.split(' ')[1] : timeStr,
+            type: item.type,
+            category: item.category,
+            amount: parseFloat(item.amount) || 0,
+            wallet: item.wallet || 'สลิป',
+            merchant: item.merchant || (item.type === 'INCOME' ? 'รายรับ' : 'ไม่ระบุชื่อ'),
+            note: item.note || 'สแกนจากสลิป/ใบเสร็จ',
+            slipRef: item.slipRef || '',
+            isCategorized: true
+          };
+        });
+
+        setTransactions(prev => [...newTxns, ...prev]);
+
+        const gasUrl = settings.googleAppsScriptUrl || DEFAULT_GAS_URL;
+        if (gasUrl) {
+          for (const t of newTxns) {
+            try {
+              await fetch(gasUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'addTransaction', transaction: t })
+              });
+            } catch (err) {
+              console.warn('Sync batch slip to Google Sheets failed:', err);
+            }
+          }
+        }
+
+        confetti({ particleCount: 50, spread: 70, origin: { y: 0.7 } });
+        alert(`บันทึกสลิปสำเร็จทั้งหมด ${newTxns.length} รายการเรียบร้อยแล้วอู๊ด! 🐷🎉`);
+        setShowScanner(false);
+        setParsedSlips([]);
       };
 
       // Save Transaction
@@ -2101,144 +2186,234 @@
             )}
           </main>
 
-          {/* Scanner Modal (Gemini Vision) */}
+          {/* Multi-Image Batch Scanner Modal (Gemini Vision) */}
           {showScanner && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-              <div className={`max-w-md w-full p-5 bg-white rounded-3xl shadow-2xl relative space-y-4 border-2 ${isBoy ? 'border-sky-200' : 'border-pink-200'}`}>
-                <button onClick={() => { setShowScanner(false); setParsedSlip(null); }} className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 font-bold">✕</button>
+              <div className={`max-w-lg w-full p-5 bg-white rounded-3xl shadow-2xl relative space-y-4 border-2 ${isBoy ? 'border-sky-200' : 'border-pink-200'}`}>
+                <button
+                  onClick={() => { setShowScanner(false); setParsedSlips([]); setScanProgress(null); }}
+                  className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 font-bold text-lg"
+                >
+                  ✕
+                </button>
+
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">📸</span>
-                  <h3 className="text-base font-black text-slate-800">สแกนสลิป / ใบเสร็จสินค้า</h3>
+                  <div>
+                    <h3 className="text-base font-black text-slate-800">สแกนสลิป / ใบเสร็จสินค้า (เลือกได้หลายรูป)</h3>
+                    <p className="text-[10px] text-slate-400">ระบบ AI อัจฉริยะ อ่านยอดเงิน ร้านค้า และแยกหมวดหมู่อัตโนมัติ</p>
+                  </div>
                 </div>
 
-                {!parsedSlip ? (
+                {parsedSlips.length === 0 ? (
                   isScanning ? (
-                    <div className="py-10 text-center space-y-2">
-                      <div className="text-4xl animate-bounce">🐽</div>
-                      <h4 className="text-sm font-bold text-slate-700">เศรษฐีหมูอ้วนกำลังเพ่งอ่านสลิป...</h4>
-                      <p className="text-xs text-slate-400">กำลังดึงชื่อร้าน ยอดเงิน และแยกประเภทอัตโนมัติ</p>
+                    <div className="py-12 text-center space-y-3">
+                      <div className="text-5xl animate-bounce">🐽</div>
+                      <h4 className="text-sm font-black text-slate-700">เศรษฐีหมูอ้วนกำลังเพ่งอ่านสลิป...</h4>
+                      {scanProgress && (
+                        <div className="space-y-2 max-w-xs mx-auto pt-2">
+                          <div className="flex justify-between text-[11px] font-bold text-slate-500">
+                            <span>สลิปที่ {scanProgress.current} จากทั้งหมด {scanProgress.total} รูป</span>
+                            <span className="font-mono text-pink-500">{Math.round((scanProgress.current / scanProgress.total) * 100)}%</span>
+                          </div>
+                          <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200">
+                            <div
+                              className="h-full rounded-full bg-candy-pink transition-all duration-300"
+                              style={{ width: `${(scanProgress.current / scanProgress.total) * 100}%` }}
+                            />
+                          </div>
+                          <p className="text-[10px] text-slate-400 truncate font-mono">{scanProgress.fileName}</p>
+                        </div>
+                      )}
                     </div>
                   ) : (
-                    <div className="p-6 border-2 border-dashed border-pink-200 rounded-2xl text-center bg-pink-50/30 space-y-3">
-                      <div className="text-3xl">🧾</div>
-                      <p className="text-xs font-bold text-slate-600">อัปโหลดสลิปโอนเงิน หรือใบเสร็จสินค้า</p>
-                      <label className={`inline-block py-2.5 px-5 ${primaryBtnClass} text-xs font-bold cursor-pointer tap-bounce`}>
-                        <span>📁 เลือกรูปจากเครื่อง</span>
+                    <div
+                      onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                          handleMultipleImageFiles(e.dataTransfer.files);
+                        }
+                      }}
+                      className="p-8 border-2 border-dashed border-pink-200 rounded-3xl text-center bg-pink-50/30 space-y-3.5 hover:bg-pink-50/60 transition-colors"
+                    >
+                      <div className="text-4xl">🧾</div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-700">เลือกรูปสลิปหรือใบเสร็จ (ได้หลายรูปพร้อมกัน)</p>
+                        <p className="text-[11px] text-pink-500 font-bold mt-1">✨ เลือกทีละ 5 รูป, 10 รูป หรือทั้งอัลบั้มได้เลยอู๊ด!</p>
+                      </div>
+
+                      <label className={`inline-block py-3 px-6 ${primaryBtnClass} text-xs font-black cursor-pointer tap-bounce shadow-md`}>
+                        <span>📁 เลือกรูปสลิปจากเครื่อง</span>
                         <input
                           type="file"
                           accept="image/*"
+                          multiple
                           className="hidden"
-                          onChange={(e) => handleImageFile(e.target.files[0])}
+                          onChange={(e) => handleMultipleImageFiles(e.target.files)}
                         />
                       </label>
-                      <p className="text-[10px] text-slate-400">ใช้ Gemini AI ช่วยอ่านอย่างแม่นยำ</p>
+
+                      <p className="text-[10px] text-slate-400">ใช้ Gemini AI ช่วยอ่านแยกประเภทและบันทึกรวมยอดให้อัตโนมัติ</p>
                     </div>
                   )
                 ) : (
-                  <div className="space-y-3">
-                    {imagePreview && (
-                      <div className="max-h-24 overflow-hidden rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center">
-                        <img src={imagePreview} className="max-h-24 object-contain" />
+                  <div className="space-y-3.5">
+                    {/* Batch Summary Header */}
+                    <div className="flex items-center justify-between p-3 rounded-2xl bg-pink-50/70 border border-pink-200">
+                      <div>
+                        <span className="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                          <span>✅ สแกนสำเร็จ {parsedSlips.length} สลิป</span>
+                        </span>
+                        <span className="text-[10px] text-slate-500 block">ตรวจสอบหรือแก้ไขข้อมูลแต่ละรายการก่อนบันทึก</span>
                       </div>
-                    )}
+                      <div className="text-right">
+                        <span className="text-[10px] text-slate-400 font-bold block">ยอดรวมทั้งชุด</span>
+                        <span className="text-xs font-mono font-black text-rose-500">
+                          -฿{parsedSlips.reduce((s, c) => s + (c.type === 'EXPENSE' ? Number(c.amount || 0) : 0), 0).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
 
-                    {/* Type Toggle */}
-                    <div className="flex bg-slate-100 p-1 rounded-2xl gap-1">
+                    {/* Scrollable list of scanned slips */}
+                    <div className="max-h-[50vh] overflow-y-auto space-y-3 pr-1">
+                      {parsedSlips.map((item, index) => (
+                        <div key={item.tempId} className="p-3.5 rounded-2xl bg-slate-50/90 border border-slate-200 space-y-2.5 relative">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center gap-2.5">
+                              {item.imagePreview && (
+                                <img
+                                  src={item.imagePreview}
+                                  alt="สลิป"
+                                  onClick={() => setPreviewSlipImage(item.imagePreview)}
+                                  className="w-12 h-12 object-cover rounded-xl border border-slate-200 shrink-0 cursor-pointer hover:opacity-80 transition-opacity shadow-xs"
+                                  title="แตะเพื่อดูรูปขนาดใหญ่"
+                                />
+                              )}
+                              <div>
+                                <span className="text-[10px] font-bold text-slate-400">สลิปที่ {index + 1}</span>
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => updateSlipItem(item.tempId, 'type', item.type === 'EXPENSE' ? 'INCOME' : 'EXPENSE')}
+                                    className={`text-[9px] font-black px-2 py-0.5 rounded-full text-white transition-all shadow-xs ${
+                                      item.type === 'INCOME' ? 'bg-emerald-500' : 'bg-rose-500'
+                                    }`}
+                                  >
+                                    {item.type === 'INCOME' ? '🟢 รายรับ' : '🔴 รายจ่าย'} (แตะสลับ)
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => removeSlipItem(item.tempId)}
+                              className="text-slate-400 hover:text-rose-500 font-bold p-1 text-sm transition-colors"
+                              title="ลบสลิปนี้"
+                            >
+                              ✕
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">ยอดเงิน (บาท)</label>
+                              <input
+                                type="number"
+                                step="0.01"
+                                value={item.amount}
+                                onChange={(e) => updateSlipItem(item.tempId, 'amount', e.target.value)}
+                                className={`w-full font-mono font-black text-sm bg-white border rounded-xl px-2.5 py-1.5 outline-none ${
+                                  item.type === 'INCOME' ? 'text-emerald-600 border-emerald-200' : 'text-rose-500 border-rose-200'
+                                }`}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">
+                                {item.type === 'INCOME' ? 'แหล่งที่มา / ผู้โอน' : 'ชื่อร้าน / ผู้รับ'}
+                              </label>
+                              <input
+                                type="text"
+                                value={item.merchant}
+                                onChange={(e) => updateSlipItem(item.tempId, 'merchant', e.target.value)}
+                                className="w-full font-bold text-slate-800 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 outline-none focus:border-pink-400"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">หมวดหมู่</label>
+                              <select
+                                value={item.category}
+                                onChange={(e) => updateSlipItem(item.tempId, 'category', e.target.value)}
+                                className="w-full font-bold text-slate-700 bg-white border border-slate-200 rounded-xl px-2 py-1.5 outline-none"
+                              >
+                                {(item.type === 'INCOME' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map(c => (
+                                  <option key={c.id} value={c.name}>{c.icon} {c.name}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">ช่องทาง / ธนาคาร</label>
+                              <input
+                                type="text"
+                                value={item.wallet}
+                                onChange={(e) => updateSlipItem(item.tempId, 'wallet', e.target.value)}
+                                className="w-full font-bold text-slate-700 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 outline-none"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Batch Actions */}
+                    <div className="flex gap-2 pt-2 border-t border-slate-100">
+                      <label className="py-2.5 px-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs cursor-pointer flex items-center justify-center gap-1 shrink-0 tap-bounce">
+                        <span>➕ เพิ่มรูป</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          className="hidden"
+                          onChange={(e) => handleMultipleImageFiles(e.target.files)}
+                        />
+                      </label>
                       <button
                         type="button"
-                        onClick={() => setScanType('EXPENSE')}
-                        className={`flex-1 py-1.5 rounded-xl text-xs font-black transition-all ${
-                          scanType === 'EXPENSE' ? 'bg-rose-500 text-white shadow-xs' : 'text-slate-500 hover:text-slate-700'
-                        }`}
+                        onClick={() => { setShowScanner(false); setParsedSlips([]); setScanProgress(null); }}
+                        className="py-2.5 px-3 rounded-full bg-slate-100 text-slate-600 font-bold text-xs shrink-0"
                       >
-                        🔴 รายจ่าย (โอนออก/ใบเสร็จ)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setScanType('INCOME')}
-                        className={`flex-1 py-1.5 rounded-xl text-xs font-black transition-all ${
-                          scanType === 'INCOME' ? 'bg-emerald-500 text-white shadow-xs' : 'text-slate-500 hover:text-slate-700'
-                        }`}
-                      >
-                        🟢 รายรับ (เงินโอนเข้า)
-                      </button>
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-500">
-                        {scanType === 'EXPENSE' ? 'ยอดเงินรายจ่าย (บาท)' : 'ยอดเงินรายรับ (บาท)'}
-                      </label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        id="slip_amount"
-                        defaultValue={parsedSlip.amount || ''}
-                        className={`w-full font-mono text-xl font-black bg-slate-50 border-2 rounded-xl px-3 py-2 outline-none ${
-                          scanType === 'EXPENSE' ? 'text-rose-500 border-rose-200' : 'text-emerald-500 border-emerald-200'
-                        }`}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-500">
-                        {scanType === 'EXPENSE' ? 'ชื่อร้านค้า / ผู้รับเงิน' : 'แหล่งที่มา / ผู้โอนเงิน'}
-                      </label>
-                      <input
-                        type="text"
-                        id="slip_merchant"
-                        defaultValue={parsedSlip.merchant || ''}
-                        className="w-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-500">
-                        หมวดหมู่{scanType === 'INCOME' ? 'รายรับ' : 'รายจ่าย'}
-                      </label>
-                      <select
-                        id="slip_category"
-                        defaultValue={parsedSlip.suggestedCategory || (scanType === 'INCOME' ? 'รายรับพิเศษ / อื่นๆ' : 'อาหารและเครื่องดื่ม')}
-                        className="w-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none"
-                      >
-                        {(scanType === 'INCOME' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map(c => (
-                          <option key={c.id} value={c.name}>{c.icon} {c.name}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="flex gap-2 pt-2">
-                      <button onClick={() => { setShowScanner(false); setParsedSlip(null); }} className="flex-1 py-2.5 rounded-full bg-slate-100 text-slate-600 font-bold text-xs">
                         ยกเลิก
                       </button>
                       <button
-                        onClick={() => {
-                          const amt = parseFloat(document.getElementById('slip_amount').value) || 0;
-                          const mer = document.getElementById('slip_merchant').value || (scanType === 'INCOME' ? 'รายรับ' : 'ไม่ระบุชื่อ');
-                          const cat = document.getElementById('slip_category').value;
-
-                          handleSaveTransaction({
-                            id: `TXN-${Date.now()}`,
-                            date: selectedDate,
-                            time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
-                            type: scanType,
-                            category: cat,
-                            amount: amt,
-                            wallet: parsedSlip.bank || 'สลิป',
-                            merchant: mer,
-                            note: parsedSlip.note || 'สแกนจากสลิป/ใบเสร็จ',
-                            slipRef: parsedSlip.slipRef || '',
-                            isCategorized: true
-                          });
-                          setShowScanner(false);
-                          setParsedSlip(null);
-                        }}
-                        className={`flex-1 py-2.5 ${scanType === 'INCOME' ? 'bg-emerald-500 hover:bg-emerald-600 text-white rounded-full' : primaryBtnClass} text-xs font-black shadow-md`}
+                        type="button"
+                        onClick={handleSaveAllBatchSlips}
+                        className={`flex-1 py-2.5 ${primaryBtnClass} text-xs font-black shadow-md`}
                       >
-                        {scanType === 'INCOME' ? '💰 บันทึกรายรับ' : '💾 บันทึกรายจ่าย'}
+                        💾 บันทึกทั้งหมด ({parsedSlips.length} รายการ)
                       </button>
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* Large Image Preview Modal */}
+          {previewSlipImage && (
+            <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in" onClick={() => setPreviewSlipImage(null)}>
+              <div className="max-w-md w-full bg-white rounded-3xl p-4 shadow-2xl relative space-y-3" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-black text-slate-800">📸 ดูรูปภาพสลิป</h4>
+                  <button onClick={() => setPreviewSlipImage(null)} className="text-slate-400 font-bold">✕</button>
+                </div>
+                <div className="max-h-[70vh] overflow-auto rounded-2xl border border-slate-100 bg-slate-50 flex items-center justify-center">
+                  <img src={previewSlipImage} alt="สลิปขยายใหญ่" className="max-h-[70vh] w-auto object-contain rounded-xl" />
+                </div>
               </div>
             </div>
           )}
