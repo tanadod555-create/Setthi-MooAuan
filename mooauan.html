@@ -32,7 +32,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
 
-  <!-- MooAuan Kawaii Design System Styles from DESIGN.md -->
+  <!-- MooAuan Kawaii Design System Styles -->
   <style>
     body {
       margin: 0;
@@ -108,14 +108,28 @@
       box-shadow: 0 1px 4px rgba(56, 189, 248, 0.2);
     }
 
-    .btn-candy-yellow {
-      background-color: #fbbf24;
-      border-bottom: 4px solid #d97706;
+    .btn-candy-green {
+      background-color: #10b981;
+      border-bottom: 4px solid #047857;
       border-radius: 9999px;
-      color: #78350f;
+      color: #ffffff;
       font-weight: 800;
       transition: all 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 4px 12px rgba(251, 191, 36, 0.35);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    .btn-candy-green:active {
+      transform: translateY(3px);
+      border-bottom-width: 1px;
+    }
+
+    .btn-candy-yellow {
+      background-color: #f59e0b;
+      border-bottom: 4px solid #b45309;
+      border-radius: 9999px;
+      color: #ffffff;
+      font-weight: 800;
+      transition: all 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
     }
     .btn-candy-yellow:active {
       transform: translateY(3px);
@@ -125,46 +139,42 @@
     /* Kawaii 3D Cards */
     .card-kawaii-pink {
       background: #ffffff;
-      border: 2.5px solid #fed7e2;
-      border-radius: 28px;
-      box-shadow: 0 6px 0 #fecdd3, 0 10px 24px -4px rgba(244, 114, 182, 0.15);
-      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .card-kawaii-pink:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 0 #fecdd3, 0 14px 26px -4px rgba(244, 114, 182, 0.2);
+      border-radius: 1.75rem;
+      border: 3px solid #ffccd8;
+      box-shadow: 0 8px 24px rgba(255, 101, 132, 0.12), 0 3px 0 #ffd6e0;
     }
 
     .card-kawaii-blue {
       background: #ffffff;
-      border: 2.5px solid #bae6fd;
-      border-radius: 28px;
-      box-shadow: 0 6px 0 #bae6fd, 0 10px 24px -4px rgba(56, 189, 248, 0.15);
-      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .card-kawaii-blue:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 0 #bae6fd, 0 14px 26px -4px rgba(56, 189, 248, 0.2);
+      border-radius: 1.75rem;
+      border: 3px solid #bae6fd;
+      box-shadow: 0 8px 24px rgba(56, 189, 248, 0.12), 0 3px 0 #cbe9fe;
     }
 
-    @keyframes cute-bounce-gentle {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-7px) rotate(1.5deg); }
+    /* Keyframe Animations */
+    @keyframes bounceGentle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
     }
     .animate-bounce-gentle {
-      animation: cute-bounce-gentle 2.4s ease-in-out infinite;
+      animation: bounceGentle 2.2s ease-in-out infinite;
     }
 
+    /* Smooth Tap Effect */
     .tap-bounce {
-      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: transform 0.1s ease;
     }
     .tap-bounce:active {
-      transform: scale(0.95);
+      transform: scale(0.96);
     }
 
+    /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
     }
     ::-webkit-scrollbar-thumb {
       background: #fbcfe8;
@@ -177,82 +187,152 @@
 
   <!-- React Application Script -->
   <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+    const { useState, useEffect, useRef, useMemo } = React;
 
-    const DEFAULT_CATEGORIES = [
-      { id: 'cat-1', name: 'อาหารและเครื่องดื่ม', icon: '🍜', color: '#ff6584', budget: 6000, type: 'EXPENSE' },
-      { id: 'cat-2', name: 'ของใช้ & ช้อปปิ้ง', icon: '🛍️', color: '#ec4899', budget: 3000, type: 'EXPENSE' },
-      { id: 'cat-3', name: 'เดินทาง / น้ำมัน', icon: '🚗', color: '#38bdf8', budget: 2500, type: 'EXPENSE' },
-      { id: 'cat-4', name: 'บิล & ค่าน้ำค่าไฟ', icon: '💡', color: '#a855f7', budget: 2000, type: 'EXPENSE' },
-      { id: 'cat-5', name: 'สุขภาพ / ยา / คลินิก', icon: '💊', color: '#10b981', budget: 1000, type: 'EXPENSE' },
-      { id: 'cat-6', name: 'บันเทิง & สังสรรค์', icon: '🎮', color: '#6366f1', budget: 1500, type: 'EXPENSE' },
-      { id: 'cat-7', name: 'อื่นๆ', icon: '📦', color: '#64748b', budget: 1000, type: 'EXPENSE' },
-      { id: 'cat-8', name: 'เงินเดือน & รายรับ', icon: '💰', color: '#22c55e', budget: 0, type: 'INCOME' },
+    // ========================================================
+    // SEPARATE CATEGORIES: EXPENSE vs INCOME
+    // ========================================================
+    const EXPENSE_CATEGORIES = [
+      { id: 'exp-1', name: 'อาหารและเครื่องดื่ม', icon: '🍜', color: '#ff6584' },
+      { id: 'exp-2', name: 'ของใช้ & ช้อปปิ้ง', icon: '🛍️', color: '#ec4899' },
+      { id: 'exp-3', name: 'เดินทาง / น้ำมัน', icon: '🚗', color: '#38bdf8' },
+      { id: 'exp-4', name: 'บิล & ค่าน้ำค่าไฟ', icon: '💡', color: '#a855f7' },
+      { id: 'exp-5', name: 'สุขภาพ / ยา / คลินิก', icon: '💊', color: '#10b981' },
+      { id: 'exp-6', name: 'บันเทิง & สังสรรค์', icon: '🎮', color: '#6366f1' },
+      { id: 'exp-7', name: 'ค่าใช้จ่ายอื่นๆ', icon: '📦', color: '#64748b' },
     ];
 
-    const DEFAULT_TRANSACTIONS = [
+    const INCOME_CATEGORIES = [
+      { id: 'inc-1', name: 'เงินเดือนประจำ', icon: '💰', color: '#10b981' },
+      { id: 'inc-2', name: 'ธุรกิจ / ค้าขาย / กำไร', icon: '💼', color: '#059669' },
+      { id: 'inc-3', name: 'โบนัส & คอมมิชชั่น', icon: '🎁', color: '#f59e0b' },
+      { id: 'inc-4', name: 'รับโอนเงิน / เพื่อนคืน', icon: '💸', color: '#3b82f6' },
+      { id: 'inc-5', name: 'เงินปันผล & ดอกเบี้ย', icon: '📈', color: '#8b5cf6' },
+      { id: 'inc-6', name: 'รายรับพิเศษ / อื่นๆ', icon: '🪙', color: '#64748b' },
+    ];
+
+    // Helper to get category metadata
+    function getCategoryInfo(name, type = 'EXPENSE') {
+      const list = type === 'INCOME' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+      const found = list.find(c => c.name === name);
+      if (found) return found;
+      // Fallback
+      return { id: 'unknown', name, icon: type === 'INCOME' ? '💰' : '🛍️', color: '#64748b' };
+    }
+
+    // Default Transactions for Maxnum (Male)
+    const DEFAULT_TRANSACTIONS_MAXNUM = [
       {
-        id: 'TXN-000',
+        id: 'TXN-M-001',
+        user: 'maxnum',
         date: new Date().toISOString().split('T')[0],
         time: '08:00',
         type: 'INCOME',
-        category: 'เงินเดือน & รายรับ',
-        amount: 25000.00,
+        category: 'เงินเดือนประจำ',
+        amount: 35000.00,
         wallet: 'KBank',
-        merchant: 'เงินเดือน / รายได้',
-        note: 'เงินเดือนโอนเข้า',
-        slipRef: '202611110800000',
+        merchant: 'บริษัทจำกัด (เงินเดือน)',
+        note: 'เงินเดือนเข้าบัญชี',
+        slipRef: '202611110800001',
         isCategorized: true
       },
       {
-        id: 'TXN-001',
+        id: 'TXN-M-002',
+        user: 'maxnum',
         date: new Date().toISOString().split('T')[0],
         time: '08:30',
         type: 'EXPENSE',
         category: 'อาหารและเครื่องดื่ม',
-        amount: 85.00,
+        amount: 95.00,
         wallet: 'KBank',
-        merchant: 'Cafe Amazon',
-        note: 'ชาเขียวนมสดหวานน้อย',
-        slipRef: '202611110830001',
+        merchant: 'Amazon Cafe',
+        note: 'อเมริกาโน่เย็น ไม่หวาน',
+        slipRef: '202611110830002',
         isCategorized: true
       },
       {
-        id: 'TXN-002',
+        id: 'TXN-M-003',
+        user: 'maxnum',
         date: new Date().toISOString().split('T')[0],
-        time: '12:20',
+        time: '12:30',
         type: 'EXPENSE',
         category: 'อาหารและเครื่องดื่ม',
-        amount: 65.00,
+        amount: 80.00,
         wallet: 'TrueMoney',
-        merchant: '7-Eleven',
-        note: 'ข้าวกะเพราหมูสับไข่ดาว',
-        slipRef: '202611111220002',
+        merchant: 'ข้าวราดแกงปักษ์ใต้',
+        note: 'มื้อเที่ยง',
+        slipRef: '202611111230003',
         isCategorized: true
       }
     ];
 
-    // Helper: Generate daily level 1-10 based on date hash + seed
+    // Default Transactions for Manow (Female)
+    const DEFAULT_TRANSACTIONS_MANOW = [
+      {
+        id: 'TXN-W-001',
+        user: 'manow',
+        date: new Date().toISOString().split('T')[0],
+        time: '08:00',
+        type: 'INCOME',
+        category: 'เงินเดือนประจำ',
+        amount: 32000.00,
+        wallet: 'SCB',
+        merchant: 'เงินเดือนประจำ',
+        note: 'เงินเดือนเข้า',
+        slipRef: '202611110800002',
+        isCategorized: true
+      },
+      {
+        id: 'TXN-W-002',
+        user: 'manow',
+        date: new Date().toISOString().split('T')[0],
+        time: '09:00',
+        type: 'EXPENSE',
+        category: 'อาหารและเครื่องดื่ม',
+        amount: 75.00,
+        wallet: 'SCB',
+        merchant: 'ชาชีสสตอเบอรี่',
+        note: 'ของหวานยามเช้า',
+        slipRef: '202611110900001',
+        isCategorized: true
+      },
+      {
+        id: 'TXN-W-003',
+        user: 'manow',
+        date: new Date().toISOString().split('T')[0],
+        time: '13:00',
+        type: 'EXPENSE',
+        category: 'ของใช้ & ช้อปปิ้ง',
+        amount: 150.00,
+        wallet: 'KBank',
+        merchant: 'EVEANDBOY',
+        note: 'ลิปมันบำรุงริมฝีปาก',
+        slipRef: '202611111300002',
+        isCategorized: true
+      }
+    ];
+
+    // Helper: Daily mascot level 1-10
     function getLevelForDate(dateStr, seed = 0) {
       let hash = seed;
       for (let i = 0; i < dateStr.length; i++) {
         hash = ((hash << 5) - hash) + dateStr.charCodeAt(i);
         hash |= 0;
       }
-      return (Math.abs(hash) % 10) + 1; // 1 to 10
+      return (Math.abs(hash) % 10) + 1;
     }
 
     // ========================================================
-    // COMPONENT: HIGH-FIDELITY PNG PIGGY MASCOT (Level 1 - 10)
+    // COMPONENT: MASCOT (PNG Level 1 - 10)
     // ========================================================
-    function PigMascot({ level = 1, isBoy = false, size = 'lg', onClick, onReroll }) {
+    function PigMascot({ level = 1, isBoy = false, size = 'lg', onClick }) {
       const [imgFailed, setImgFailed] = useState(false);
 
       const sizeClasses = {
         sm: 'w-10 h-10',
-        md: 'w-20 h-20',
-        lg: 'w-28 h-28 sm:w-32 sm:h-32',
-        xl: 'w-44 h-44'
+        md: 'w-16 h-16',
+        lg: 'w-24 h-24 sm:w-28 sm:h-28',
+        xl: 'w-36 h-36'
       };
 
       const folderPrefix = isBoy ? 'maxnum' : 'manow';
@@ -261,34 +341,21 @@
       return (
         <div 
           onClick={onClick}
-          className={`relative inline-flex items-center justify-center select-none ${sizeClasses[size]} animate-bounce-gentle cursor-pointer group`}
-          title={`เศรษฐีหมูอ้วนร่าง เลเวล ${level} (แตะเพื่อสุ่มเปลี่ยนร่าง)`}
+          className={`relative inline-flex items-center justify-center select-none ${sizeClasses[size]} animate-bounce-gentle cursor-pointer group shrink-0`}
+          title="เศรษฐีหมูอ้วน (แตะเพื่อสุ่มเปลี่ยนรูป)"
         >
           {!imgFailed ? (
             <img
               src={pngSrc}
-              alt={`เศรษฐีหมูอ้วน Lv.${level}`}
+              alt="เศรษฐีหมูอ้วน"
               className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-105 transition-transform"
               onError={() => setImgFailed(true)}
             />
           ) : (
-            // Fallback SVG if image not found
-            <svg viewBox="0 0 100 100" fill="none" className="w-full h-full drop-shadow-lg">
-              <ellipse cx="50" cy="52" rx="38" ry="34" fill={isBoy ? '#7dd3fc' : '#ffb6c1'} stroke={isBoy ? '#0284c7' : '#f06292'} strokeWidth="2.5" />
-              <ellipse cx="50" cy="58" rx="15" ry="10" fill={isBoy ? '#e0f2fe' : '#ffd1dc'} stroke={isBoy ? '#0284c7' : '#f06292'} strokeWidth="2" />
-              <circle cx="45" cy="58" r="2.5" fill={isBoy ? '#0284c7' : '#e91e63'} />
-              <circle cx="55" cy="58" r="2.5" fill={isBoy ? '#0284c7' : '#e91e63'} />
-              <circle cx="36" cy="46" r="4" fill="#374151" />
-              <circle cx="64" cy="46" r="4" fill="#374151" />
-            </svg>
+            <div className="w-full h-full rounded-full bg-pink-100 flex items-center justify-center text-4xl shadow-inner border-2 border-pink-300">
+              {isBoy ? '🐗' : '🐷'}
+            </div>
           )}
-
-          {/* Level Badge Pill */}
-          <span className={`absolute -bottom-1 -right-1 text-[9px] font-black px-1.5 py-0.2 rounded-full shadow border text-white ${
-            isBoy ? 'bg-sky-500 border-sky-200' : 'bg-pink-500 border-pink-200'
-          }`}>
-            Lv.{level}
-          </span>
         </div>
       );
     }
@@ -296,7 +363,7 @@
     // ========================================================
     // COMPONENT: CIRCULAR PROGRESS
     // ========================================================
-    function CircularProgress({ value, max, size = 110, strokeWidth = 9, color = '#ff6584', bgColor = '#fed7e2', label = 'เกณฑ์วัน' }) {
+    function CircularProgress({ value, max, size = 95, strokeWidth = 8, color = '#ff6584', bgColor = '#fed7e2', label = 'เกณฑ์วัน' }) {
       const radius = (size - strokeWidth) / 2;
       const circumference = 2 * Math.PI * radius;
       const safePercent = Math.min(Math.max(value / (max || 1), 0), 1);
@@ -328,47 +395,464 @@
     }
 
     // ========================================================
+    // COMPONENT: LOGIN SCREEN (Privacy Protected)
+    // ========================================================
+    function LoginScreen({ onLogin }) {
+      const [username, setUsername] = useState('');
+      const [password, setPassword] = useState('');
+      const [errorMsg, setErrorMsg] = useState('');
+
+      const handleLoginSubmit = (e) => {
+        if (e) e.preventDefault();
+        const u = username.trim().toLowerCase();
+        const p = password.trim();
+
+        if (u === 'maxnum' && p === 'maxnum') {
+          onLogin({ username: 'maxnum', name: 'แม็กนั่ม (Maxnum)', theme: 'maxnum', isBoy: true });
+        } else if (u === 'manow' && p === 'manow') {
+          onLogin({ username: 'manow', name: 'มะนาว (Manow)', theme: 'manow', isBoy: false });
+        } else {
+          setErrorMsg('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง (ลองใช้ maxnum / maxnum หรือ manow / manow นะอู๊ด)');
+        }
+      };
+
+      const handleQuickLogin = (userKey) => {
+        if (userKey === 'maxnum') {
+          onLogin({ username: 'maxnum', name: 'แม็กนั่ม (Maxnum)', theme: 'maxnum', isBoy: true });
+        } else {
+          onLogin({ username: 'manow', name: 'มะนาว (Manow)', theme: 'manow', isBoy: false });
+        }
+      };
+
+      return (
+        <div className="min-h-screen flex items-center justify-center p-4">
+          <div className="max-w-sm w-full bg-white rounded-3xl p-6 shadow-2xl border-4 border-pink-200 space-y-5 text-center">
+            {/* Mascot Preview */}
+            <div className="flex justify-center -space-x-3 pt-2">
+              <div className="w-20 h-20 rounded-full bg-sky-50 border-2 border-sky-300 flex items-center justify-center p-1 shadow-md">
+                <img src="./mascots/maxnum_lv3.png" className="w-full h-full object-contain" onError={(e) => { e.target.style.display='none'; }} />
+              </div>
+              <div className="w-20 h-20 rounded-full bg-pink-50 border-2 border-pink-300 flex items-center justify-center p-1 shadow-md z-10">
+                <img src="./mascots/manow_lv3.png" className="w-full h-full object-contain" onError={(e) => { e.target.style.display='none'; }} />
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-black text-slate-800 flex items-center justify-center gap-1.5">
+                <span>🐷</span>
+                <span>เศรษฐีหมูอ้วน</span>
+              </h2>
+              <p className="text-xs text-slate-500 font-bold mt-1">
+                เข้าสู่ระบบส่วนตัว (Private Account)
+              </p>
+              <p className="text-[11px] text-slate-400">
+                ข้อมูลรายรับรายจ่ายจะถูกแยกเก็บเป็นส่วนตัว 100%
+              </p>
+            </div>
+
+            {errorMsg && (
+              <div className="p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs font-bold animate-shake">
+                ⚠️ {errorMsg}
+              </div>
+            )}
+
+            <form onSubmit={handleLoginSubmit} className="space-y-3 text-left">
+              <div>
+                <label className="text-xs font-bold text-slate-600 block mb-1">ชื่อผู้ใช้ (Username)</label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="maxnum หรือ manow"
+                  className="w-full text-xs font-bold bg-slate-50 border-2 border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:border-pink-400"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-600 block mb-1">รหัสผ่าน (Password)</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="รหัสผ่าน"
+                  className="w-full text-xs font-mono bg-slate-50 border-2 border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:border-pink-400"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 btn-candy-pink text-sm font-black shadow-md mt-1"
+              >
+                🔐 เข้าสู่ระบบ
+              </button>
+            </form>
+
+            <div className="pt-2 border-t border-slate-100">
+              <span className="text-[11px] font-bold text-slate-400 block mb-2">⚡ เข้าสู่ระบบด่วนในคลิกเดียว:</span>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin('maxnum')}
+                  className="py-2.5 px-3 btn-candy-blue text-xs font-black shadow-sm flex items-center justify-center gap-1"
+                >
+                  <span>🏋️‍♂️</span>
+                  <span>แม็กนั่ม</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin('manow')}
+                  className="py-2.5 px-3 btn-candy-pink text-xs font-black shadow-sm flex items-center justify-center gap-1"
+                >
+                  <span>🌸</span>
+                  <span>มะนาว</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ========================================================
+    // COMPONENT: ANALYTICS & STATS VIEW (Daily, Weekly, Monthly)
+    // ========================================================
+    function StatsView({ transactions, isBoy, cardClass }) {
+      const [period, setPeriod] = useState('daily'); // 'daily' | 'weekly' | 'monthly'
+
+      // Filtered data based on period
+      const chartData = useMemo(() => {
+        const now = new Date();
+        const formatYMD = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+        if (period === 'daily') {
+          // Last 7 days
+          const days = [];
+          for (let i = 6; i >= 0; i--) {
+            const d = new Date(now);
+            d.setDate(d.getDate() - i);
+            const dateStr = formatYMD(d);
+            const label = d.toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric' });
+
+            const dayTxns = transactions.filter(t => t.date === dateStr);
+            const income = dayTxns.filter(t => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0);
+            const expense = dayTxns.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
+
+            days.push({ key: dateStr, label, income, expense });
+          }
+          return days;
+        } else if (period === 'weekly') {
+          // Last 4 weeks
+          const weeks = [];
+          for (let i = 3; i >= 0; i--) {
+            const end = new Date(now);
+            end.setDate(end.getDate() - (i * 7));
+            const start = new Date(end);
+            start.setDate(start.getDate() - 6);
+
+            const startStr = formatYMD(start);
+            const endStr = formatYMD(end);
+            const label = `${start.getDate()} - ${end.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}`;
+
+            const weekTxns = transactions.filter(t => t.date >= startStr && t.date <= endStr);
+            const income = weekTxns.filter(t => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0);
+            const expense = weekTxns.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
+
+            weeks.push({ key: `W-${i}`, label, income, expense });
+          }
+          return weeks;
+        } else {
+          // Last 6 months
+          const months = [];
+          for (let i = 5; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const yr = d.getFullYear();
+            const mo = String(d.getMonth() + 1).padStart(2, '0');
+            const monthStr = `${yr}-${mo}`;
+            const label = d.toLocaleDateString('th-TH', { month: 'short', year: '2-digit' });
+
+            const mTxns = transactions.filter(t => t.date && t.date.startsWith(monthStr));
+            const income = mTxns.filter(t => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0);
+            const expense = mTxns.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
+
+            months.push({ key: monthStr, label, income, expense });
+          }
+          return months;
+        }
+      }, [transactions, period]);
+
+      // Category Expense breakdown
+      const expenseByCategory = useMemo(() => {
+        const map = {};
+        transactions.filter(t => t.type === 'EXPENSE').forEach(t => {
+          map[t.category] = (map[t.category] || 0) + t.amount;
+        });
+        const totalExp = Object.values(map).reduce((s, a) => s + a, 0) || 1;
+        return Object.entries(map)
+          .map(([name, amount]) => ({
+            name,
+            amount,
+            percent: Math.round((amount / totalExp) * 100),
+            meta: getCategoryInfo(name, 'EXPENSE')
+          }))
+          .sort((a, b) => b.amount - a.amount);
+      }, [transactions]);
+
+      // Category Income breakdown
+      const incomeByCategory = useMemo(() => {
+        const map = {};
+        transactions.filter(t => t.type === 'INCOME').forEach(t => {
+          map[t.category] = (map[t.category] || 0) + t.amount;
+        });
+        const totalInc = Object.values(map).reduce((s, a) => s + a, 0) || 1;
+        return Object.entries(map)
+          .map(([name, amount]) => ({
+            name,
+            amount,
+            percent: Math.round((amount / totalInc) * 100),
+            meta: getCategoryInfo(name, 'INCOME')
+          }))
+          .sort((a, b) => b.amount - a.amount);
+      }, [transactions]);
+
+      // Period Totals
+      const totalPeriodIncome = chartData.reduce((s, d) => s + d.income, 0);
+      const totalPeriodExpense = chartData.reduce((s, d) => s + d.expense, 0);
+      const periodBalance = totalPeriodIncome - totalPeriodExpense;
+
+      // Max value for bar heights
+      const maxBarValue = Math.max(...chartData.map(d => Math.max(d.income, d.expense)), 100);
+
+      return (
+        <div className="space-y-4 animate-in fade-in">
+          {/* Period Selector Tabs */}
+          <div className="flex bg-white/80 p-1.5 rounded-2xl border-2 border-slate-200 gap-1 shadow-sm">
+            {[
+              { id: 'daily', label: '📅 รายวัน (7 วัน)' },
+              { id: 'weekly', label: '📆 รายสัปดาห์ (4 วีค)' },
+              { id: 'monthly', label: '📊 รายเดือน (6 เดือน)' }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setPeriod(tab.id)}
+                className={`flex-1 py-2 rounded-xl text-xs font-black transition-all ${
+                  period === tab.id
+                    ? isBoy ? 'bg-sky-500 text-white shadow-sm' : 'bg-pink-500 text-white shadow-sm'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Period KPI Summary Cards */}
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className={`p-3 ${cardClass}`}>
+              <span className="text-[10px] text-slate-400 font-bold block">🟢 รวมรายรับ</span>
+              <span className="font-mono font-black text-xs sm:text-sm text-emerald-600">
+                +฿{totalPeriodIncome.toLocaleString('th-TH', { maximumFractionDigits: 0 })}
+              </span>
+            </div>
+            <div className={`p-3 ${cardClass}`}>
+              <span className="text-[10px] text-slate-400 font-bold block">🔴 รวมรายจ่าย</span>
+              <span className="font-mono font-black text-xs sm:text-sm text-rose-500">
+                -฿{totalPeriodExpense.toLocaleString('th-TH', { maximumFractionDigits: 0 })}
+              </span>
+            </div>
+            <div className={`p-3 ${cardClass}`}>
+              <span className="text-[10px] text-slate-400 font-bold block">💵 คงเหลือสุทธิ</span>
+              <span className={`font-mono font-black text-xs sm:text-sm ${periodBalance < 0 ? 'text-rose-500' : 'text-emerald-600'}`}>
+                {periodBalance < 0 ? '-' : '+'}฿{Math.abs(periodBalance).toLocaleString('th-TH', { maximumFractionDigits: 0 })}
+              </span>
+            </div>
+          </div>
+
+          {/* Comparative Bar Chart: Green (Income) vs Red (Expense) */}
+          <div className={`p-5 ${cardClass} space-y-4`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
+                  <span>📈 กราฟเปรียบเทียบ รายรับ vs รายจ่าย</span>
+                </h3>
+                <p className="text-[10px] text-slate-400">แท่งเขียว (รายรับ) เทียบ แท่งแดง (รายจ่าย)</p>
+              </div>
+              <div className="flex items-center gap-2 text-[10px] font-bold">
+                <span className="flex items-center gap-1 text-emerald-600"><span className="w-2.5 h-2.5 rounded bg-emerald-500 inline-block"></span> รายรับ</span>
+                <span className="flex items-center gap-1 text-rose-500"><span className="w-2.5 h-2.5 rounded bg-rose-500 inline-block"></span> รายจ่าย</span>
+              </div>
+            </div>
+
+            {/* Bars Canvas */}
+            <div className="h-44 flex items-end justify-between gap-2 pt-6 pb-1 border-b border-slate-100">
+              {chartData.map((d) => {
+                const incomeHeight = Math.min((d.income / maxBarValue) * 100, 100);
+                const expenseHeight = Math.min((d.expense / maxBarValue) * 100, 100);
+
+                return (
+                  <div key={d.key} className="flex-1 flex flex-col items-center h-full justify-end group relative">
+                    {/* Tooltip on hover */}
+                    <div className="absolute -top-10 bg-slate-800 text-white text-[9px] px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 whitespace-nowrap shadow-lg">
+                      รับ: +฿{d.income.toFixed(0)} | จ่าย: -฿{d.expense.toFixed(0)}
+                    </div>
+
+                    <div className="w-full flex items-end justify-center gap-1 h-36">
+                      {/* Income Bar (Green) */}
+                      <div
+                        className="w-1/2 max-w-[14px] bg-emerald-400 hover:bg-emerald-500 rounded-t-md transition-all duration-500"
+                        style={{ height: `${Math.max(incomeHeight, 4)}%` }}
+                        title={`รายรับ: ฿${d.income.toFixed(2)}`}
+                      />
+                      {/* Expense Bar (Red) */}
+                      <div
+                        className="w-1/2 max-w-[14px] bg-rose-400 hover:bg-rose-500 rounded-t-md transition-all duration-500"
+                        style={{ height: `${Math.max(expenseHeight, 4)}%` }}
+                        title={`รายจ่าย: ฿${d.expense.toFixed(2)}`}
+                      />
+                    </div>
+                    <span className="text-[9px] font-bold text-slate-400 mt-2 truncate w-full text-center">
+                      {d.label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Expense Category Breakdown */}
+          <div className={`p-5 ${cardClass} space-y-3`}>
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+              <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
+                <span>🛒 สัดส่วนรายจ่ายแยกตามหมวดหมู่</span>
+              </h3>
+              <span className="text-xs font-mono font-black text-rose-500">
+                รวม ฿{expenseByCategory.reduce((s, c) => s + c.amount, 0).toLocaleString()}
+              </span>
+            </div>
+
+            {expenseByCategory.length === 0 ? (
+              <p className="text-xs text-slate-400 text-center py-4">ยังไม่มีบันทึกรายจ่าย</p>
+            ) : (
+              <div className="space-y-2.5">
+                {expenseByCategory.map((c) => (
+                  <div key={c.name} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1.5 font-bold text-slate-700">
+                        <span>{c.meta.icon}</span>
+                        <span>{c.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-black text-slate-700">฿{c.amount.toFixed(2)}</span>
+                        <span className="text-[10px] font-bold text-slate-400 w-8 text-right">{c.percent}%</span>
+                      </div>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{ width: `${c.percent}%`, backgroundColor: c.meta.color || '#ff6584' }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Income Source Breakdown */}
+          <div className={`p-5 ${cardClass} space-y-3`}>
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+              <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
+                <span>💰 สัดส่วนรายรับแยกตามประเภท</span>
+              </h3>
+              <span className="text-xs font-mono font-black text-emerald-600">
+                รวม ฿{incomeByCategory.reduce((s, c) => s + c.amount, 0).toLocaleString()}
+              </span>
+            </div>
+
+            {incomeByCategory.length === 0 ? (
+              <p className="text-xs text-slate-400 text-center py-4">ยังไม่มีบันทึกรายรับ</p>
+            ) : (
+              <div className="space-y-2.5">
+                {incomeByCategory.map((c) => (
+                  <div key={c.name} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1.5 font-bold text-slate-700">
+                        <span>{c.meta.icon}</span>
+                        <span>{c.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-black text-emerald-600">+฿{c.amount.toFixed(2)}</span>
+                        <span className="text-[10px] font-bold text-slate-400 w-8 text-right">{c.percent}%</span>
+                      </div>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+                        style={{ width: `${c.percent}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ========================================================
     // MAIN APP
     // ========================================================
     function App() {
-      // Theme State: 'manow' (Strawberry Pink) | 'maxnum' (Soda Pop Blue)
-      const [theme, setTheme] = useState(() => localStorage.getItem('moouan_theme') || 'manow');
-      const isBoy = theme === 'maxnum';
+      // Current logged in account session
+      const [currentUser, setCurrentUser] = useState(() => {
+        const raw = localStorage.getItem('setthi_auth_session');
+        return raw ? JSON.parse(raw) : null;
+      });
 
+      const isBoy = currentUser?.username === 'maxnum';
+      const userKey = currentUser?.username || 'guest';
+
+      // Set body theme based on logged in user
       useEffect(() => {
-        document.body.className = isBoy ? 'theme-maxnum' : 'theme-manow';
-        localStorage.setItem('moouan_theme', theme);
-      }, [theme]);
+        if (currentUser) {
+          document.body.className = isBoy ? 'theme-maxnum' : 'theme-manow';
+        } else {
+          document.body.className = 'theme-manow';
+        }
+      }, [currentUser, isBoy]);
 
-      // Settings
+      // Settings partitioned per user
       const [settings, setSettings] = useState(() => {
-        const raw = localStorage.getItem('moouan_settings');
+        if (!currentUser) return { dailyBudget: 600, monthlyLimit: 20000, geminiApiKey: '', googleAppsScriptUrl: '' };
+        const raw = localStorage.getItem(`setthi_settings_${currentUser.username}`);
         return raw ? JSON.parse(raw) : {
           geminiApiKey: '',
           googleAppsScriptUrl: '',
-          dailyBudget: 600,
-          monthlyBudget: 18000,
-          streakCount: 3,
-          lastActiveDate: new Date().toISOString().split('T')[0]
+          dailyBudget: currentUser.username === 'maxnum' ? 600 : 500,
+          monthlyLimit: currentUser.username === 'maxnum' ? 20000 : 18000,
+          streakCount: 3
         };
       });
 
-      // Transactions
+      // Transactions partitioned per user
       const [transactions, setTransactions] = useState(() => {
-        const raw = localStorage.getItem('moouan_transactions');
-        return raw ? JSON.parse(raw) : DEFAULT_TRANSACTIONS;
+        if (!currentUser) return [];
+        const raw = localStorage.getItem(`setthi_txns_${currentUser.username}`);
+        if (raw) return JSON.parse(raw);
+        return currentUser.username === 'maxnum' ? DEFAULT_TRANSACTIONS_MAXNUM : DEFAULT_TRANSACTIONS_MANOW;
       });
 
-      const [categories] = useState(DEFAULT_CATEGORIES);
+      // Active view tab: 'home' | 'stats'
+      const [activeTab, setActiveTab] = useState('home');
 
       // Selected Date
       const today = new Date().toISOString().split('T')[0];
       const [selectedDate, setSelectedDate] = useState(today);
 
-      // Seed for random mascot reroll
+      // Mascot reroll seed
       const [mascotRerollSeed, setMascotRerollSeed] = useState(0);
-
-      // Current level for the selected date
       const mascotLevel = getLevelForDate(selectedDate, mascotRerollSeed);
 
       // Modals
@@ -381,22 +865,55 @@
       const [parsedSlip, setParsedSlip] = useState(null);
       const [imagePreview, setImagePreview] = useState(null);
 
+      // Sync user data when switching or logging in
       useEffect(() => {
-        localStorage.setItem('moouan_transactions', JSON.stringify(transactions));
-      }, [transactions]);
+        if (currentUser) {
+          const rawTxns = localStorage.getItem(`setthi_txns_${currentUser.username}`);
+          setTransactions(rawTxns ? JSON.parse(rawTxns) : (currentUser.username === 'maxnum' ? DEFAULT_TRANSACTIONS_MAXNUM : DEFAULT_TRANSACTIONS_MANOW));
 
+          const rawSet = localStorage.getItem(`setthi_settings_${currentUser.username}`);
+          setSettings(rawSet ? JSON.parse(rawSet) : {
+            geminiApiKey: '',
+            googleAppsScriptUrl: '',
+            dailyBudget: currentUser.username === 'maxnum' ? 600 : 500,
+            monthlyLimit: currentUser.username === 'maxnum' ? 20000 : 18000,
+            streakCount: 3
+          });
+        }
+      }, [currentUser]);
+
+      // Save transactions per user
       useEffect(() => {
-        localStorage.setItem('moouan_settings', JSON.stringify(settings));
-      }, [settings]);
+        if (currentUser) {
+          localStorage.setItem(`setthi_txns_${currentUser.username}`, JSON.stringify(transactions));
+        }
+      }, [transactions, currentUser]);
 
-      // Calculations for Monthly (Budget counted from actual received income)
+      // Save settings per user
+      useEffect(() => {
+        if (currentUser) {
+          localStorage.setItem(`setthi_settings_${currentUser.username}`, JSON.stringify(settings));
+        }
+      }, [settings, currentUser]);
+
+      // Logout handler
+      const handleLogout = () => {
+        if (confirm('ต้องการออกจากระบบใช่หรือไม่?')) {
+          localStorage.removeItem('setthi_auth_session');
+          setCurrentUser(null);
+        }
+      };
+
+      // Monthly Calculations
       const selectedMonth = selectedDate.substring(0, 7); // e.g. "2026-11"
       const monthTxns = transactions.filter(t => t.date && t.date.startsWith(selectedMonth));
       const monthIncome = monthTxns.filter(t => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0);
       const monthExpense = monthTxns.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
-      const monthBalance = monthIncome - monthExpense;
+      const monthlyLimit = settings.monthlyLimit || 20000;
+      const monthlyLimitRemaining = monthlyLimit - monthExpense;
+      const netSavings = monthIncome - monthExpense;
 
-      // Filter transactions for selected date
+      // Daily Calculations
       const dateTxns = transactions.filter(t => t.date === selectedDate);
       const dayExpense = dateTxns.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
       const dayIncome = dateTxns.filter(t => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0);
@@ -424,8 +941,8 @@
         }
 
         const reader = new FileReader();
-        reader.onload = async () => {
-          const base64Data = reader.result;
+        reader.onload = async (e) => {
+          const base64Data = e.target.result;
           setImagePreview(base64Data);
           setIsScanning(true);
 
@@ -435,11 +952,12 @@
 คุณคือ AI ผู้ช่วยตรวจสอบสลิปโอนเงินธนาคารไทย และใบเสร็จสินค้าของแอป "เศรษฐีหมูอ้วน"
 จงวิเคราะห์ภาพที่ได้รับและแปลงเป็น JSON Object เท่านั้น:
 {
-  "merchant": "ชื่อร้านค้า หรือชื่อผู้รับเงิน เช่น 7-Eleven, Grab, คาเฟ่, นายสมชาย",
+  "type": "EXPENSE หรือ INCOME (ถ้าเป็นสลิปเงินเข้า บัญชีรับเงิน ให้ตอบ INCOME, ถ้าเป็นสลิปโอนออกหรือใบเสร็จ ให้ตอบ EXPENSE)",
+  "merchant": "ชื่อร้านค้า หรือชื่อผู้รับเงิน/ผู้โอนเงิน",
   "amount": 0.00,
   "datetime": "YYYY-MM-DD HH:mm",
   "bank": "ธนาคารหรือวอลเล็ต เช่น KBank, SCB, KTB, BBL, TTB, GSB, TrueMoney",
-  "suggestedCategory": "เลือก 1 หมวดหมู่: [อาหารและเครื่องดื่ม, ของใช้ & ช้อปปิ้ง, เดินทาง / น้ำมัน, บิล & ค่าน้ำค่าไฟ, สุขภาพ / ยา / คลินิก, บันเทิง & สังสรรค์, อื่นๆ]",
+  "suggestedCategory": "เลือก 1 หมวดหมู่: ถ้าเป็นรายจ่าย [อาหารและเครื่องดื่ม, ของใช้ & ช้อปปิ้ง, เดินทาง / น้ำมัน, บิล & ค่าน้ำค่าไฟ, สุขภาพ / ยา / คลินิก, บันเทิง & สังสรรค์, ค่าใช้จ่ายอื่นๆ], ถ้าเป็นรายรับ [เงินเดือนประจำ, ธุรกิจ / ค้าขาย / กำไร, โบนัส & คอมมิชชั่น, รับโอนเงิน / เพื่อนคืน, เงินปันผล & ดอกเบี้ย, รายรับพิเศษ / อื่นๆ]",
   "note": "บันทึกช่วยจำ (ถ้ามี)",
   "slipRef": "เลขอ้างอิงสลิป"
 }`;
@@ -463,17 +981,18 @@
             const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
             const parsed = JSON.parse(text.trim());
 
+            setScanType(parsed.type === 'INCOME' ? 'INCOME' : 'EXPENSE');
+            setParsedSlip(parsed);
+          } catch (err) {
+            console.error(err);
+            alert('ไม่สามารถอ่านสลิปได้ กรุณาตรวจสอบรูปภาพ หรือกรอกข้อมูลด้วยตนเอง');
             setParsedSlip({
-              merchant: parsed.merchant || 'ไม่ระบุชื่อร้าน',
-              amount: parseFloat(parsed.amount) || 0,
-              datetime: parsed.datetime || `${selectedDate} 12:00`,
-              bank: parsed.bank || 'KBank',
-              suggestedCategory: parsed.suggestedCategory || 'อาหารและเครื่องดื่ม',
-              note: parsed.note || '',
-              slipRef: parsed.slipRef || ''
+              merchant: 'ไม่ระบุชื่อ',
+              amount: 0.0,
+              suggestedCategory: 'อาหารและเครื่องดื่ม',
+              note: '',
+              slipRef: ''
             });
-          } catch (e) {
-            alert(`สแกนไม่สำเร็จ: ${e.message}`);
           } finally {
             setIsScanning(false);
           }
@@ -481,41 +1000,59 @@
         reader.readAsDataURL(file);
       };
 
-      const handleSaveTransaction = (txn) => {
-        setTransactions(prev => [txn, ...prev]);
-        confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+      // Save Transaction
+      const handleSaveTransaction = async (txn) => {
+        const fullTxn = {
+          ...txn,
+          user: currentUser.username
+        };
+        setTransactions(prev => [fullTxn, ...prev]);
 
+        // Sync to Google Sheets if configured
         if (settings.googleAppsScriptUrl) {
-          fetch(settings.googleAppsScriptUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: 'add_transaction', transaction: txn })
-          }).catch(console.warn);
+          try {
+            await fetch(settings.googleAppsScriptUrl, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'addTransaction', transaction: fullTxn })
+            });
+          } catch (err) {
+            console.warn('Sync to Google Sheets failed:', err);
+          }
         }
+        confetti({ particleCount: 30, spread: 50, origin: { y: 0.8 } });
       };
 
+      // Delete Transaction
       const handleDelete = (id) => {
-        if (!confirm('ต้องการลบรายการนี้ใช่หรือไม่?')) return;
-        setTransactions(prev => prev.filter(t => t.id !== id));
-        if (settings.googleAppsScriptUrl) {
-          fetch(settings.googleAppsScriptUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: 'delete_transaction', id })
-          }).catch(console.warn);
+        if (confirm('ต้องการลบรายการนี้ใช่หรือไม่?')) {
+          setTransactions(prev => prev.filter(t => t.id !== id));
         }
       };
+
+      // If not logged in, show Login Screen
+      if (!currentUser) {
+        return (
+          <LoginScreen
+            onLogin={(user) => {
+              setCurrentUser(user);
+              localStorage.setItem('setthi_auth_session', JSON.stringify(user));
+            }}
+          />
+        );
+      }
 
       return (
-        <div className="min-h-screen flex flex-col pb-16">
-          {/* Top Bar */}
-          <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b border-pink-100 px-4 py-2.5 shadow-sm">
-            <div className="max-w-2xl mx-auto flex items-center justify-between">
-              {/* Brand & Mascot */}
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl overflow-hidden bg-white shadow-sm border border-pink-100 flex items-center justify-center p-0.5">
+        <div className="min-h-screen flex flex-col pb-20">
+          {/* Header */}
+          <header className="sticky top-0 z-40 backdrop-blur-md bg-white/75 border-b border-pink-100 shadow-xs">
+            <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+              {/* Logo & App Name */}
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-2xl bg-pink-100 flex items-center justify-center shadow-xs overflow-hidden p-0.5 border-2 border-pink-200">
                   <img
-                    src={isBoy ? './mascots/maxnum_icon.png' : './mascots/manow_icon.png'}
+                    src={`./mascots/${isBoy ? 'maxnum' : 'manow'}_icon.png`}
                     alt="Icon"
                     className="w-full h-full object-contain"
                     onError={(e) => { e.target.style.display = 'none'; }}
@@ -523,278 +1060,332 @@
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <h1 className="text-lg font-black text-slate-800">เศรษฐีหมูอ้วน</h1>
-                    <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full text-white ${isBoy ? 'bg-sky-400' : 'bg-pink-400'}`}>
-                      Setthi MooAuan
+                    <h1 className="text-base sm:text-lg font-black text-slate-800">เศรษฐีหมูอ้วน</h1>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full text-white ${isBoy ? 'bg-sky-500' : 'bg-pink-500'}`}>
+                      {currentUser.name}
                     </span>
                   </div>
-                  <p className="text-[10px] text-slate-400 font-medium">บันทึกสินค้า & สลิปอัจฉริยะ</p>
+                  <p className="text-[10px] text-slate-400 font-medium">บันทึกสินค้า & สลิปอัจฉริยะ (ส่วนตัว)</p>
                 </div>
               </div>
 
-              {/* Action Buttons */}
+              {/* Header Right Actions: Streak, Settings & Logout */}
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setTheme(isBoy ? 'manow' : 'maxnum')}
-                  className="px-2.5 py-1 rounded-full text-xs font-bold bg-white border-2 border-pink-100 hover:border-pink-300 transition-all flex items-center gap-1 shadow-sm"
-                  title="สลับธีม 🌸 ชมพูหวาน / 🏋️‍♂️ ฟ้าสปอร์ต"
-                >
-                  <span>{isBoy ? '🏋️‍♂️ ฟ้า' : '🌸 ชมพู'}</span>
-                </button>
-
-                <div className="px-2.5 py-1 rounded-full text-xs font-black bg-amber-100/80 text-amber-700 border border-amber-300 flex items-center gap-1">
-                  <span>🔥 {settings.streakCount} วัน</span>
+                <div className="px-2 py-1 rounded-full text-[11px] font-black bg-amber-50 text-amber-600 border border-amber-200 flex items-center gap-1">
+                  🔥 3 วัน
                 </div>
 
                 <button
                   onClick={() => setShowSettings(true)}
-                  className="p-1.5 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-slate-800 shadow-sm"
+                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-sm tap-bounce"
+                  title="ตั้งค่า"
                 >
                   ⚙️
+                </button>
+
+                <button
+                  onClick={handleLogout}
+                  className="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200 tap-bounce"
+                  title="ออกจากระบบ"
+                >
+                  🚪 ออก
                 </button>
               </div>
             </div>
           </header>
 
+          {/* View Mode Switcher (Home vs Stats) */}
+          <div className="max-w-2xl w-full mx-auto px-4 pt-3">
+            <div className="flex bg-white/70 p-1 rounded-2xl border border-slate-200 gap-1 shadow-xs">
+              <button
+                onClick={() => setActiveTab('home')}
+                className={`flex-1 py-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
+                  activeTab === 'home'
+                    ? isBoy ? 'bg-sky-500 text-white shadow-sm' : 'bg-pink-500 text-white shadow-sm'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <span>🏠</span>
+                <span>หน้าหลัก & จดบิล</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('stats')}
+                className={`flex-1 py-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
+                  activeTab === 'stats'
+                    ? isBoy ? 'bg-sky-500 text-white shadow-sm' : 'bg-pink-500 text-white shadow-sm'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <span>📊</span>
+                <span>สถิติ & ดูกราฟ</span>
+              </button>
+            </div>
+          </div>
+
           {/* Main Layout */}
           <main className="max-w-2xl w-full mx-auto p-4 space-y-4 flex-1">
-            {/* Date Navigator */}
-            <div className={`p-3 ${cardClass} flex items-center justify-between shadow-sm`}>
-              <button
-                onClick={() => shiftDate(-1)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 tap-bounce"
-              >
-                ◀
-              </button>
-              <div className="text-center cursor-pointer" onClick={() => setSelectedDate(today)}>
-                <div className="text-xs font-bold text-slate-400">
-                  {selectedDate === today ? '✨ วันนี้' : 'ย้อนหลัง'}
+            {activeTab === 'stats' ? (
+              <StatsView transactions={transactions} isBoy={isBoy} cardClass={cardClass} />
+            ) : (
+              <div className="space-y-4 animate-in fade-in">
+                {/* Date Navigator */}
+                <div className={`p-3 ${cardClass} flex items-center justify-between shadow-xs`}>
+                  <button
+                    onClick={() => shiftDate(-1)}
+                    className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 tap-bounce"
+                  >
+                    ◀
+                  </button>
+                  <div className="text-center cursor-pointer" onClick={() => setSelectedDate(today)}>
+                    <div className="text-xs font-bold text-slate-400">
+                      {selectedDate === today ? '✨ วันนี้' : 'ย้อนหลัง'}
+                    </div>
+                    <div className="text-sm font-black text-slate-700">
+                      {new Date(selectedDate).toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => shiftDate(1)}
+                    className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 tap-bounce"
+                  >
+                    ▶
+                  </button>
                 </div>
-                <div className="text-sm font-black text-slate-700">
-                  {new Date(selectedDate).toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
-                </div>
-              </div>
-              <button
-                onClick={() => shiftDate(1)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 tap-bounce"
-              >
-                ▶
-              </button>
-            </div>
 
-            {/* Mascot Stage & Daily Budget Card */}
-            <div className={`p-5 ${cardClass} relative overflow-hidden`}>
-              <div className="flex items-center justify-between gap-4">
-                {/* Left: High-Fidelity PNG Mascot & Level Switcher */}
-                <div className="flex items-center gap-3">
-                  <PigMascot
-                    level={mascotLevel}
-                    isBoy={isBoy}
-                    size="lg"
-                    onClick={() => {
-                      setMascotRerollSeed(s => s + 1);
-                      confetti({ particleCount: 25, spread: 40 });
-                    }}
-                  />
-                  <div>
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full text-white ${isBoy ? 'bg-sky-500' : 'bg-pink-500'}`}>
-                        Mascot Lv.{mascotLevel}
+                {/* Mascot Stage & Daily Benchmark Card */}
+                <div className={`p-5 ${cardClass} relative overflow-hidden`}>
+                  <div className="flex items-center justify-between gap-3">
+                    {/* Left: Mascot & Quote */}
+                    <div className="flex items-center gap-3">
+                      <PigMascot
+                        level={mascotLevel}
+                        isBoy={isBoy}
+                        size="lg"
+                        onClick={() => {
+                          setMascotRerollSeed(s => s + 1);
+                          confetti({ particleCount: 25, spread: 40 });
+                        }}
+                      />
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full text-white ${isBoy ? 'bg-sky-500' : 'bg-pink-500'}`}>
+                            น้องหมูอ้วน
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-bold cursor-pointer hover:underline" onClick={() => setMascotRerollSeed(s => s + 1)}>
+                            🎲 สลับรูป
+                          </span>
+                        </div>
+                        <p className="text-xs sm:text-sm font-bold text-slate-700 leading-snug max-w-[170px] sm:max-w-xs">
+                          {dayExpense > dailyBenchmark 
+                            ? 'อู๊ดๆ! วันนี้ช้อปเกินเกณฑ์วันไปแล้วนะพี่มนุษย์ เพลาๆ หน่อย!'
+                            : 'วันนี้เศรษฐีหมูอ้วนคอยเฝ้ากระปุกให้อยู่นะอู๊ด!'
+                          }
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Right: Circular Progress against Daily Benchmark */}
+                    <CircularProgress
+                      value={dayExpense}
+                      max={dailyBenchmark}
+                      size={95}
+                      strokeWidth={8}
+                      color={dayExpense > dailyBenchmark ? '#f43f5e' : primaryColor}
+                      bgColor={primaryBgColor}
+                      label="เกณฑ์วัน"
+                    />
+                  </div>
+
+                  {/* Daily Metrics */}
+                  <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-3 text-center">
+                    <div>
+                      <div className="text-[10px] text-slate-400 font-bold">ใช้ไปวันนี้</div>
+                      <div className="text-sm sm:text-base font-mono font-black text-rose-500">
+                        ฿{dayExpense.toFixed(2)}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-slate-400 font-bold">เกณฑ์กำหนดวัน</div>
+                      <div className="text-sm sm:text-base font-mono font-black text-slate-700">
+                        ฿{dailyBenchmark.toFixed(2)}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-slate-400 font-bold">คงเหลือตามเกณฑ์</div>
+                      <div className={`text-sm sm:text-base font-mono font-black ${remainingDayBudget < 0 ? 'text-red-500' : 'text-emerald-500'}`}>
+                        ฿{remainingDayBudget.toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+
+                  {dayIncome > 0 && (
+                    <div className="mt-2.5 text-center text-xs font-bold text-emerald-600 bg-emerald-50/80 border border-emerald-100 rounded-xl py-1 flex items-center justify-center gap-1">
+                      <span>💰</span>
+                      <span>บันทึกรายรับวันนี้: +฿{dayIncome.toFixed(2)}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Quick Action Buttons */}
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => setShowScanner(true)}
+                    className={`py-3 px-4 ${primaryBtnClass} flex items-center justify-center gap-2 tap-bounce text-sm shadow-md`}
+                  >
+                    <span>📷 สแกนสลิป / ใบเสร็จ</span>
+                  </button>
+                  <button
+                    onClick={() => setShowManualAdd(true)}
+                    className="py-3 px-4 btn-candy-yellow flex items-center justify-center gap-2 tap-bounce text-sm shadow-md"
+                  >
+                    <span>➕ จดรายการเอง</span>
+                  </button>
+                </div>
+
+                {/* Item & Transaction List for Selected Date */}
+                <div className={`p-4 ${cardClass} space-y-3`}>
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <h3 className="text-sm font-black text-slate-700 flex items-center gap-1.5">
+                      <span>🛒 รายการวันนี้</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 font-bold text-slate-500">
+                        {dateTxns.length}
                       </span>
-                      <span className="text-[10px] text-slate-400 font-bold cursor-pointer hover:underline" onClick={() => setMascotRerollSeed(s => s + 1)}>
-                        🎲 สุ่มร่าง
+                    </h3>
+                    <div className="text-right">
+                      <span className="text-xs font-mono font-black text-rose-500 mr-2">
+                        จ่าย ฿{dayExpense.toFixed(2)}
+                      </span>
+                      {dayIncome > 0 && (
+                        <span className="text-xs font-mono font-black text-emerald-600">
+                          รับ +฿{dayIncome.toFixed(2)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {dateTxns.length === 0 ? (
+                    <div className="py-8 text-center text-xs text-slate-400 space-y-1">
+                      <div className="text-2xl">🍃</div>
+                      <p>ยังไม่มีรายการในวันที่เลือก</p>
+                      <p className="text-[10px] text-slate-300">กดปุ่มสแกนสลิปหรือจดรายการด้านบนได้เลยอู๊ด!</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {dateTxns.map(t => {
+                        const meta = getCategoryInfo(t.category, t.type);
+                        const isIncome = t.type === 'INCOME';
+
+                        return (
+                          <div key={t.id} className="p-3 rounded-2xl bg-slate-50/80 border border-slate-100 flex items-center justify-between hover:bg-slate-100/60 transition-colors">
+                            <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg bg-white shadow-xs border border-slate-100">
+                                {meta.icon}
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-xs font-bold text-slate-800">{t.merchant}</span>
+                                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-medium border ${
+                                    isIncome ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-pink-50 text-pink-600 border-pink-100'
+                                  }`}>
+                                    {t.category}
+                                  </span>
+                                </div>
+                                <div className="text-[10px] text-slate-400 font-medium">
+                                  {t.time} • {t.wallet} {t.note ? `• "${t.note}"` : ''}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                              <span className={`font-mono font-black text-sm ${isIncome ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                {isIncome ? '+' : '-'}฿{t.amount.toFixed(2)}
+                              </span>
+                              <button onClick={() => handleDelete(t.id)} className="text-slate-300 hover:text-red-500 font-bold text-xs p-1">
+                                ✕
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Monthly Spending Limit & Actual Income Card */}
+                <div className={`p-4 ${cardClass} space-y-3`}>
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-1.5 font-bold text-slate-700">
+                      <span>🎯 ขีดจำกัดงบ & รายรับเดือนนี้</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 font-mono">
+                        {selectedMonth}
                       </span>
                     </div>
-                    <p className="text-xs sm:text-sm font-bold text-slate-700 leading-snug max-w-[180px] sm:max-w-xs">
-                      {dayExpense > settings.dailyBudget 
-                        ? 'อู๊ดๆ! วันนี้ช้อปเกินงบวันไปแล้วนะพี่มนุษย์ เพลาๆ หน่อย!'
-                        : `วันนี้เศรษฐีหมูอ้วนร่าง Lv.${mascotLevel} คอยเฝ้ากระปุกให้อยู่นะอู๊ด!`
-                      }
-                    </p>
+                    <div className="text-right">
+                      <span className="text-[10px] text-slate-400 block font-medium">รายรับจริงสะสม</span>
+                      <span className="font-mono font-black text-emerald-600 text-xs sm:text-sm">
+                        +฿{monthIncome.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Monthly Limit Progress Gauge */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[11px] font-bold text-slate-600">
+                      <span>
+                        จ่ายไป: <span className="font-mono text-rose-500 font-black">฿{monthExpense.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+                        <span className="text-slate-400 font-normal"> / ขีดจำกัด ฿{monthlyLimit.toLocaleString()}</span>
+                      </span>
+                      <span className={monthExpense > monthlyLimit ? 'text-rose-600 font-black' : 'text-slate-500'}>
+                        {Math.round((monthExpense / (monthlyLimit || 1)) * 100)}%
+                      </span>
+                    </div>
+                    <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden p-0.5">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          monthExpense > monthlyLimit
+                            ? 'bg-rose-500'
+                            : isBoy ? 'bg-sky-400' : 'bg-pink-400'
+                        }`}
+                        style={{
+                          width: `${Math.min((monthExpense / (monthlyLimit || 1)) * 100, 100)}%`
+                        }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-[10px] text-slate-400 pt-0.5">
+                      <span>
+                        {monthlyLimitRemaining >= 0 
+                          ? `เหลืองบใช้ได้อีก ฿${monthlyLimitRemaining.toFixed(2)} ในเดือนนี้`
+                          : `⚠️ เกินขีดจำกัดเดือนนี้ไปแล้ว ฿${Math.abs(monthlyLimitRemaining).toFixed(2)}`
+                        }
+                      </span>
+                      <span>ตั้งขีดจำกัดไว้ไม่เกิน ฿{monthlyLimit.toLocaleString()}</span>
+                    </div>
+                  </div>
+
+                  {/* Monthly Overview Grid */}
+                  <div className="grid grid-cols-3 gap-2 pt-1 border-t border-slate-100 text-[11px] text-center">
+                    <div className="bg-slate-50/80 rounded-xl p-2 border border-slate-100">
+                      <span className="text-[10px] text-slate-400 block font-medium">รายรับจริง</span>
+                      <span className="font-mono font-black text-emerald-600 text-xs">
+                        +฿{monthIncome.toFixed(0)}
+                      </span>
+                    </div>
+                    <div className="bg-slate-50/80 rounded-xl p-2 border border-slate-100">
+                      <span className="text-[10px] text-slate-400 block font-medium">รายจ่ายสะสม</span>
+                      <span className="font-mono font-black text-rose-500 text-xs">
+                        -฿{monthExpense.toFixed(0)}
+                      </span>
+                    </div>
+                    <div className="bg-slate-50/80 rounded-xl p-2 border border-slate-100">
+                      <span className="text-[10px] text-slate-400 block font-medium">เงินเก็บสุทธิ</span>
+                      <span className={`font-mono font-black text-xs ${netSavings < 0 ? 'text-rose-500' : 'text-emerald-600'}`}>
+                        {netSavings < 0 ? '-' : '+'}฿{Math.abs(netSavings).toFixed(0)}
+                      </span>
+                    </div>
                   </div>
                 </div>
-
-                {/* Right: Circular Budget Progress */}
-                <CircularProgress
-                  value={dayExpense}
-                  max={dailyBenchmark}
-                  size={95}
-                  strokeWidth={9}
-                  color={dayExpense > dailyBenchmark ? '#f43f5e' : primaryColor}
-                  bgColor={primaryBgColor}
-                  label="เกณฑ์วัน"
-                />
               </div>
-
-              {/* Budget Metrics Footer */}
-              <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-3 text-center">
-                <div>
-                  <div className="text-[10px] text-slate-400 font-bold">ใช้ไปวันนี้</div>
-                  <div className="text-sm sm:text-base font-mono font-black text-rose-500">
-                    ฿{dayExpense.toFixed(2)}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[10px] text-slate-400 font-bold">เกณฑ์กำหนดวัน</div>
-                  <div className="text-sm sm:text-base font-mono font-black text-slate-700">
-                    ฿{dailyBenchmark.toFixed(2)}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[10px] text-slate-400 font-bold">คงเหลือตามเกณฑ์</div>
-                  <div className={`text-sm sm:text-base font-mono font-black ${remainingDayBudget < 0 ? 'text-red-500' : 'text-emerald-500'}`}>
-                    ฿{remainingDayBudget.toFixed(2)}
-                  </div>
-                </div>
-              </div>
-              {dayIncome > 0 && (
-                <div className="mt-2.5 text-center text-xs font-bold text-emerald-600 bg-emerald-50/80 border border-emerald-100 rounded-xl py-1 flex items-center justify-center gap-1">
-                  <span>💰</span>
-                  <span>บันทึกรายรับวันนี้: +฿{dayIncome.toFixed(2)}</span>
-                </div>
-              )}
-            </div>
-
-            {/* Quick Action Buttons (Tactile 3D) */}
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => setShowScanner(true)}
-                className={`py-3 px-4 ${primaryBtnClass} flex items-center justify-center gap-2 tap-bounce text-sm shadow-md`}
-              >
-                <span>📷 สแกนสลิป / ใบเสร็จ</span>
-              </button>
-              <button
-                onClick={() => setShowManualAdd(true)}
-                className="py-3 px-4 btn-candy-yellow flex items-center justify-center gap-2 tap-bounce text-sm shadow-md"
-              >
-                <span>➕ จดรายการเอง</span>
-              </button>
-            </div>
-
-            {/* Item & Transaction List for Selected Date */}
-            <div className={`p-4 ${cardClass} space-y-3`}>
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                <h3 className="text-sm font-black text-slate-700 flex items-center gap-1.5">
-                  <span>🛒 รายการสินค้า & บิลวันนี้</span>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 font-bold text-slate-500">
-                    {dateTxns.length}
-                  </span>
-                </h3>
-                <span className="text-xs font-mono font-black text-rose-500">
-                  รวม ฿{dayExpense.toFixed(2)}
-                </span>
-              </div>
-
-              {dateTxns.length === 0 ? (
-                <div className="py-8 text-center text-xs text-slate-400 space-y-1">
-                  <div className="text-2xl">🍃</div>
-                  <p>ยังไม่มีรายการสินค้าในวันที่เลือก</p>
-                  <p className="text-[10px] text-slate-300">กดปุ่มสแกนสลิปด้านบนเพื่อบันทึกรายการได้เลยอู๊ด!</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {dateTxns.map(t => {
-                    const cat = categories.find(c => c.name === t.category);
-                    return (
-                      <div key={t.id} className="p-3 rounded-2xl bg-slate-50/80 border border-slate-100 flex items-center justify-between hover:bg-slate-100/60 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg bg-white shadow-sm border border-slate-100">
-                            {cat?.icon || '🛍️'}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-xs font-bold text-slate-800">{t.merchant}</span>
-                              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-pink-50 text-pink-600 font-medium border border-pink-100">
-                                {t.category}
-                              </span>
-                            </div>
-                            <div className="text-[10px] text-slate-400 font-medium">
-                              {t.time} • {t.wallet} {t.note ? `• "${t.note}"` : ''}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                          <span className={`font-mono font-black text-sm ${t.type === 'EXPENSE' ? 'text-rose-500' : 'text-emerald-500'}`}>
-                            {t.type === 'EXPENSE' ? '-' : '+'}฿{t.amount.toFixed(2)}
-                          </span>
-                          <button onClick={() => handleDelete(t.id)} className="text-slate-300 hover:text-red-500 font-bold text-xs p-1">
-                            ✕
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Monthly Summary based on Actual Income (No fixed monthly budget) */}
-            <div className={`p-4 ${cardClass} space-y-3`}>
-              <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-1.5 font-bold text-slate-700">
-                  <span>📊 สรุปกระเป๋าเงินประจำเดือน</span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 font-mono">
-                    {selectedMonth}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <span className="text-[10px] text-slate-400 block font-medium">รายรับจริงเดือนนี้</span>
-                  <span className="font-mono font-black text-emerald-600 text-xs sm:text-sm">
-                    ฿{monthIncome.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
-                </div>
-              </div>
-
-              {/* Expense vs Actual Income Gauge */}
-              <div className="space-y-1">
-                <div className="flex justify-between text-[11px] font-bold text-slate-500">
-                  <span>จ่ายสะสม: <span className="font-mono text-rose-500 font-black">฿{monthExpense.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></span>
-                  <span>
-                    {monthIncome > 0
-                      ? `ใช้ไป ${Math.round((monthExpense / monthIncome) * 100)}% ของรายรับ`
-                      : 'ยังไม่มีบันทึกรายรับ'}
-                  </span>
-                </div>
-                <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden p-0.5">
-                  <div
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      monthIncome > 0 && monthExpense > monthIncome
-                        ? 'bg-rose-500'
-                        : isBoy ? 'bg-sky-400' : 'bg-pink-400'
-                    }`}
-                    style={{
-                      width: `${monthIncome > 0 ? Math.min((monthExpense / monthIncome) * 100, 100) : 0}%`
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Monthly Stats Grid */}
-              <div className="grid grid-cols-3 gap-2 pt-1 border-t border-slate-100 text-[11px] text-center">
-                <div className="bg-slate-50/80 rounded-xl p-2 border border-slate-100">
-                  <span className="text-[10px] text-slate-400 block font-medium">รายรับเดือนนี้</span>
-                  <span className="font-mono font-black text-emerald-600 text-xs">
-                    +฿{monthIncome.toFixed(0)}
-                  </span>
-                </div>
-                <div className="bg-slate-50/80 rounded-xl p-2 border border-slate-100">
-                  <span className="text-[10px] text-slate-400 block font-medium">รายจ่ายเดือนนี้</span>
-                  <span className="font-mono font-black text-rose-500 text-xs">
-                    -฿{monthExpense.toFixed(0)}
-                  </span>
-                </div>
-                <div className="bg-slate-50/80 rounded-xl p-2 border border-slate-100">
-                  <span className="text-[10px] text-slate-400 block font-medium">คงเหลือสุทธิ</span>
-                  <span className={`font-mono font-black text-xs ${monthBalance < 0 ? 'text-rose-500' : 'text-emerald-600'}`}>
-                    ฿{monthBalance.toFixed(0)}
-                  </span>
-                </div>
-              </div>
-              <p className="text-[10px] text-slate-400 text-center font-medium pt-0.5">
-                💡 เกณฑ์คุมงบเฉลี่ยวันละ ฿{dailyBenchmark.toFixed(2)} (ใช้เป็นเกณฑ์เปรียบเทียบ ส่วนงบเดือนนับตามรายรับจริง)
-              </p>
-            </div>
+            )}
           </main>
 
           {/* Scanner Modal (Gemini Vision) */}
@@ -812,37 +1403,39 @@
                     <div className="py-10 text-center space-y-2">
                       <div className="text-4xl animate-bounce">🐽</div>
                       <h4 className="text-sm font-bold text-slate-700">เศรษฐีหมูอ้วนกำลังเพ่งอ่านสลิป...</h4>
-                      <p className="text-xs text-slate-400">กำลังดึงชื่อร้าน ยอดเงิน และจัดหมวดหมู่อัตโนมัติ</p>
+                      <p className="text-xs text-slate-400">กำลังดึงชื่อร้าน ยอดเงิน และแยกประเภทอัตโนมัติ</p>
                     </div>
                   ) : (
                     <div className="p-6 border-2 border-dashed border-pink-200 rounded-2xl text-center bg-pink-50/30 space-y-3">
                       <div className="text-3xl">🧾</div>
-                      <p className="text-xs font-bold text-slate-600">อัปโหลดสลิปธนาคาร หรือใบเสร็จ 7-Eleven</p>
+                      <p className="text-xs font-bold text-slate-600">อัปโหลดสลิปโอนเงิน หรือใบเสร็จสินค้า</p>
                       <label className={`inline-block py-2.5 px-5 ${primaryBtnClass} text-xs font-bold cursor-pointer tap-bounce`}>
                         <span>📁 เลือกรูปจากเครื่อง</span>
                         <input
                           type="file"
                           accept="image/*"
                           className="hidden"
-                          onChange={(e) => e.target.files?.[0] && handleImageFile(e.target.files[0])}
+                          onChange={(e) => handleImageFile(e.target.files[0])}
                         />
                       </label>
+                      <p className="text-[10px] text-slate-400">ใช้ Gemini 2.5 Flash ช่วยอ่านอย่างแม่นยำ</p>
                     </div>
                   )
                 ) : (
-                  <div className="space-y-3 animate-in zoom-in-95">
+                  <div className="space-y-3">
                     {imagePreview && (
-                      <div className="max-h-28 overflow-hidden rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center">
-                        <img src={imagePreview} className="max-h-28 object-contain" />
+                      <div className="max-h-24 overflow-hidden rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center">
+                        <img src={imagePreview} className="max-h-24 object-contain" />
                       </div>
                     )}
-                    {/* Type Toggle for Scanned Slip */}
+
+                    {/* Type Toggle */}
                     <div className="flex bg-slate-100 p-1 rounded-2xl gap-1">
                       <button
                         type="button"
                         onClick={() => setScanType('EXPENSE')}
                         className={`flex-1 py-1.5 rounded-xl text-xs font-black transition-all ${
-                          scanType === 'EXPENSE' ? 'bg-rose-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                          scanType === 'EXPENSE' ? 'bg-rose-500 text-white shadow-xs' : 'text-slate-500 hover:text-slate-700'
                         }`}
                       >
                         🔴 รายจ่าย (โอนออก/ใบเสร็จ)
@@ -851,7 +1444,7 @@
                         type="button"
                         onClick={() => setScanType('INCOME')}
                         className={`flex-1 py-1.5 rounded-xl text-xs font-black transition-all ${
-                          scanType === 'INCOME' ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                          scanType === 'INCOME' ? 'bg-emerald-500 text-white shadow-xs' : 'text-slate-500 hover:text-slate-700'
                         }`}
                       >
                         🟢 รายรับ (เงินโอนเข้า)
@@ -873,7 +1466,7 @@
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] font-bold text-slate-500">ชื่อร้านค้า / ผู้โอน / สินค้า</label>
+                      <label className="text-[11px] font-bold text-slate-500">ชื่อร้านค้า / แหล่งที่มา</label>
                       <input
                         type="text"
                         id="scan_merchant"
@@ -888,7 +1481,9 @@
                         defaultValue={parsedSlip.suggestedCategory}
                         className="w-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none"
                       >
-                        {categories.map(c => <option key={c.id} value={c.name}>{c.icon} {c.name}</option>)}
+                        {(scanType === 'INCOME' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map(c => (
+                          <option key={c.id} value={c.name}>{c.icon} {c.name}</option>
+                        ))}
                       </select>
                     </div>
                     <div>
@@ -932,9 +1527,9 @@
                           setShowScanner(false);
                           setParsedSlip(null);
                         }}
-                        className={`flex-2 py-2.5 px-5 ${scanType === 'INCOME' ? 'bg-emerald-500 hover:bg-emerald-600 text-white rounded-full' : primaryBtnClass} text-xs font-black shadow-md`}
+                        className={`flex-2 py-2.5 px-5 ${scanType === 'INCOME' ? 'bg-emerald-500 text-white rounded-full' : primaryBtnClass} text-xs font-black shadow-md`}
                       >
-                        {scanType === 'INCOME' ? '💰 บันทึกรายรับเข้ากระปุก' : '💾 บันทึกลงกระปุกเศรษฐีหมูอ้วน'}
+                        {scanType === 'INCOME' ? '💰 บันทึกรายรับเข้ากระปุก' : '💾 บันทึกรายจ่าย'}
                       </button>
                     </div>
                   </div>
@@ -958,7 +1553,7 @@
                     type="button"
                     onClick={() => setManualType('EXPENSE')}
                     className={`flex-1 py-1.5 rounded-xl text-xs font-black transition-all ${
-                      manualType === 'EXPENSE' ? 'bg-rose-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                      manualType === 'EXPENSE' ? 'bg-rose-500 text-white shadow-xs' : 'text-slate-500 hover:text-slate-700'
                     }`}
                   >
                     🔴 รายจ่าย
@@ -967,10 +1562,10 @@
                     type="button"
                     onClick={() => setManualType('INCOME')}
                     className={`flex-1 py-1.5 rounded-xl text-xs font-black transition-all ${
-                      manualType === 'INCOME' ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                      manualType === 'INCOME' ? 'bg-emerald-500 text-white shadow-xs' : 'text-slate-500 hover:text-slate-700'
                     }`}
                   >
-                    🟢 รายรับ (นับเป็นงบเดือน)
+                    🟢 รายรับ
                   </button>
                 </div>
 
@@ -1000,13 +1595,16 @@
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-bold text-slate-500">หมวดหมู่</label>
+                  <label className="text-[11px] font-bold text-slate-500">
+                    หมวดหมู่{manualType === 'INCOME' ? 'รายรับ' : 'รายจ่าย'}
+                  </label>
                   <select
                     id="manual_category"
-                    defaultValue={manualType === 'INCOME' ? 'เงินเดือน & รายรับ' : 'อาหารและเครื่องดื่ม'}
                     className="w-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none"
                   >
-                    {categories.map(c => <option key={c.id} value={c.name}>{c.icon} {c.name}</option>)}
+                    {(manualType === 'INCOME' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map(c => (
+                      <option key={c.id} value={c.name}>{c.icon} {c.name}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -1048,9 +1646,36 @@
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
               <div className="max-w-sm w-full p-5 bg-white rounded-3xl shadow-2xl space-y-3.5 border-2 border-slate-200 text-xs">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-black text-slate-800">⚙️ ตั้งค่า เศรษฐีหมูอ้วน</h3>
+                  <h3 className="text-sm font-black text-slate-800">⚙️ ตั้งค่า: {currentUser.name}</h3>
                   <button onClick={() => setShowSettings(false)} className="text-slate-400 font-bold">✕</button>
                 </div>
+
+                <div>
+                  <label className="font-bold text-slate-600 block mb-1">ขีดจำกัดงบรายจ่ายเดือนนี้ (บาท)</label>
+                  <input
+                    type="number"
+                    id="cfg_monthly_limit"
+                    defaultValue={settings.monthlyLimit || 20000}
+                    className="w-full font-bold bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 outline-none"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    🎯 กำหนดเป้าหมายว่าจะใช้ไม่เกินเท่าไหร่ในเดือนนี้ (รายรับจะนับแยกต่างหาก)
+                  </p>
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-600 block mb-1">เกณฑ์กำหนดรายวัน (บาท/วัน)</label>
+                  <input
+                    type="number"
+                    id="cfg_daily_budget"
+                    defaultValue={settings.dailyBudget || 600}
+                    className="w-full font-bold bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 outline-none"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-0.5">
+                    📌 เกณฑ์อ้างอิงเปรียบเทียบในวงแหวนของน้องหมูแต่ละวัน
+                  </p>
+                </div>
+
                 <div>
                   <label className="font-bold text-slate-600 block mb-1">Gemini API Key (สำหรับสแกนสลิป)</label>
                   <input
@@ -1064,6 +1689,7 @@
                     รับ Gemini API Key ฟรีจาก Google AI Studio
                   </a>
                 </div>
+
                 <div>
                   <label className="font-bold text-slate-600 block mb-1">Google Apps Script Web App URL</label>
                   <input
@@ -1075,18 +1701,6 @@
                   />
                   <p className="text-[10px] text-slate-400 mt-0.5">ใช้ Code.gs ในโฟลเดอร์โปรเจกต์นี้</p>
                 </div>
-                <div>
-                  <label className="font-bold text-slate-600 block mb-1">เกณฑ์กำหนดรายวัน (บาท/วัน)</label>
-                  <input
-                    type="number"
-                    id="cfg_daily_budget"
-                    defaultValue={settings.dailyBudget}
-                    className="w-full font-bold bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 outline-none"
-                  />
-                  <p className="text-[10px] text-slate-400 mt-1">
-                    📌 เกณฑ์รายวันเป็นเป้าหมายอ้างอิงเปรียบเทียบ ส่วนงบรายเดือนจะนับรวมตามยอดรายรับจริงอัตโนมัติ
-                  </p>
-                </div>
 
                 <div className="flex gap-2 pt-2">
                   <button onClick={() => setShowSettings(false)} className="flex-1 py-2.5 rounded-full bg-slate-100 text-slate-600 font-bold">
@@ -1097,12 +1711,14 @@
                       const k = document.getElementById('cfg_key').value.trim();
                       const u = document.getElementById('cfg_url').value.trim();
                       const db = parseFloat(document.getElementById('cfg_daily_budget').value) || 600;
+                      const ml = parseFloat(document.getElementById('cfg_monthly_limit').value) || 20000;
 
                       setSettings(prev => ({
                         ...prev,
                         geminiApiKey: k,
                         googleAppsScriptUrl: u,
-                        dailyBudget: db
+                        dailyBudget: db,
+                        monthlyLimit: ml
                       }));
                       setShowSettings(false);
                       alert('บันทึกการตั้งค่าเรียบร้อยแล้วอู๊ด!');
