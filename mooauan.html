@@ -3,169 +3,159 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>เศรษฐีหมูอ้วน (Setthi MooAuan) - จดรายรับรายจ่าย & สแกนสลิปอัจฉริยะ</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐷</text></svg>">
+  <title>เศรษฐีหมูอ้วน - บันทึกรายรับรายจ่ายสุดน่ารัก</title>
   
-  <!-- Google Fonts: Fredoka, Prompt, Nunito, JetBrains Mono -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@600;700;800;900&family=Prompt:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
-
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <!-- Google Fonts: Prompt & Fredoka -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+
+  <!-- React 18 & Babel Standalone -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Prompt', 'Fredoka', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
+            sans: ['Prompt', 'sans-serif'],
+            display: ['Fredoka', 'Prompt', 'sans-serif'],
+          },
+          colors: {
+            candy: {
+              pink: '#ff6584',
+              pinkLight: '#ff8da1',
+              pinkBg: '#fff0f3',
+              blue: '#38bdf8',
+              blueLight: '#7dd3fc',
+              blueBg: '#f0f9ff',
+              yellow: '#fbbf24',
+              green: '#34d399',
+            }
+          },
+          boxShadow: {
+            'candy': '0 8px 0 rgba(255, 101, 132, 0.25)',
+            'candy-blue': '0 8px 0 rgba(56, 189, 248, 0.25)',
+            'bubble': '0 12px 24px -6px rgba(255, 101, 132, 0.15)',
+            'bubble-blue': '0 12px 24px -6px rgba(56, 189, 248, 0.15)',
+            'inset-candy': 'inset 0 2px 4px rgba(255, 255, 255, 0.8), inset 0 -3px 0 rgba(0, 0, 0, 0.08)',
+          },
+          animation: {
+            'bounce-gentle': 'bounceGentle 3s ease-in-out infinite',
+            'wiggle': 'wiggle 1s ease-in-out infinite',
+            'float': 'float 4s ease-in-out infinite',
+            'pop': 'pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+            'pulse-soft': 'pulseSoft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            bounceGentle: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-6px)' },
+            },
+            wiggle: {
+              '0%, 100%': { transform: 'rotate(-3deg)' },
+              '50%': { transform: 'rotate(3deg)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-8px)' },
+            },
+            pop: {
+              '0%': { transform: 'scale(0.8)', opacity: '0' },
+              '100%': { transform: 'scale(1)', opacity: '1' },
+            },
+            pulseSoft: {
+              '0%, 100%': { opacity: '1', transform: 'scale(1)' },
+              '50%': { opacity: '0.85', transform: 'scale(1.03)' },
+            }
           }
         }
       }
     }
   </script>
 
-  <!-- React 18, ReactDOM & Babel Standalone CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
-
-  <!-- MooAuan Kawaii Design System Styles -->
   <style>
     body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Prompt', 'Fredoka', 'Nunito', sans-serif;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
+      font-family: 'Prompt', sans-serif;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
       user-select: none;
-      letter-spacing: -0.01em;
-      transition: background-color 0.3s ease, color 0.3s ease;
+      transition: background-color 0.4s ease;
     }
-
-    /* 🌸 Theme 1: Strawberry Mochi (Manow) */
+    .font-fredoka { font-family: 'Fredoka', 'Prompt', sans-serif; }
+    
+    /* Theme variations */
     body.theme-manow {
-      background-color: #fff5f8;
-      background-image: 
-        radial-gradient(#fecdd3 1.2px, transparent 1.2px),
-        radial-gradient(#fbcfe8 1.2px, #fff5f8 1.2px);
-      background-size: 32px 32px;
-      background-position: 0 0, 16px 16px;
-      color: #4a152e;
+      background: radial-gradient(circle at 15% 15%, #ffe4e6 0%, #fff1f2 35%, #fff5f5 100%);
     }
-
-    /* 🏋️‍♂️ Theme 2: Soda Pop Arcade (Maxnum) */
     body.theme-maxnum {
-      background-color: #f0f8ff;
-      background-image: 
-        radial-gradient(#bae6fd 1.2px, transparent 1.2px),
-        radial-gradient(#e0f2fe 1.2px, #f0f8ff 1.2px);
-      background-size: 32px 32px;
-      background-position: 0 0, 16px 16px;
-      color: #0f172a;
+      background: radial-gradient(circle at 15% 15%, #e0f2fe 0%, #f0f9ff 35%, #f8fafc 100%);
     }
 
-    /* Tactile 3D Buttons */
-    .btn-candy-pink {
-      background-color: #ff6584;
-      border-bottom: 4px solid #d93d62;
-      border-radius: 9999px;
-      color: #ffffff;
-      font-weight: 800;
-      transition: all 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 4px 12px rgba(255, 101, 132, 0.3);
+    .card-kawaii-pink {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border: 3px solid #fecdd3;
+      border-radius: 2rem;
+      box-shadow: 0 10px 25px -5px rgba(255, 101, 132, 0.12), 0 8px 10px -6px rgba(255, 101, 132, 0.08);
     }
-    .btn-candy-pink:hover {
-      background-color: #ff7593;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(255, 101, 132, 0.4);
+    .card-kawaii-blue {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border: 3px solid #bae6fd;
+      border-radius: 2rem;
+      box-shadow: 0 10px 25px -5px rgba(56, 189, 248, 0.12), 0 8px 10px -6px rgba(56, 189, 248, 0.08);
+    }
+
+    .btn-candy-pink {
+      background: linear-gradient(180deg, #ff758f 0%, #ff5277 100%);
+      box-shadow: 0 4px 0 #e0244d, 0 8px 15px rgba(255, 82, 119, 0.35);
+      transition: all 0.15s ease;
+      color: white;
+      border-radius: 9999px;
     }
     .btn-candy-pink:active {
       transform: translateY(3px);
-      border-bottom-width: 1px;
-      box-shadow: 0 1px 4px rgba(255, 101, 132, 0.2);
+      box-shadow: 0 1px 0 #e0244d, 0 3px 6px rgba(255, 82, 119, 0.3);
     }
 
     .btn-candy-blue {
-      background-color: #38bdf8;
-      border-bottom: 4px solid #0284c7;
+      background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+      box-shadow: 0 4px 0 #0369a1, 0 8px 15px rgba(2, 132, 199, 0.35);
+      transition: all 0.15s ease;
+      color: white;
       border-radius: 9999px;
-      color: #ffffff;
-      font-weight: 800;
-      transition: all 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.35);
-    }
-    .btn-candy-blue:hover {
-      background-color: #60a5fa;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(56, 189, 248, 0.45);
     }
     .btn-candy-blue:active {
       transform: translateY(3px);
-      border-bottom-width: 1px;
-      box-shadow: 0 1px 4px rgba(56, 189, 248, 0.2);
-    }
-
-    .btn-candy-green {
-      background-color: #10b981;
-      border-bottom: 4px solid #047857;
-      border-radius: 9999px;
-      color: #ffffff;
-      font-weight: 800;
-      transition: all 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-    }
-    .btn-candy-green:active {
-      transform: translateY(3px);
-      border-bottom-width: 1px;
+      box-shadow: 0 1px 0 #0369a1, 0 3px 6px rgba(2, 132, 199, 0.3);
     }
 
     .btn-candy-yellow {
-      background-color: #f59e0b;
-      border-bottom: 4px solid #b45309;
+      background: linear-gradient(180deg, #fcd34d 0%, #f59e0b 100%);
+      box-shadow: 0 4px 0 #d97706, 0 8px 15px rgba(245, 158, 11, 0.35);
+      transition: all 0.15s ease;
+      color: white;
       border-radius: 9999px;
-      color: #ffffff;
-      font-weight: 800;
-      transition: all 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
     }
     .btn-candy-yellow:active {
       transform: translateY(3px);
-      border-bottom-width: 1px;
+      box-shadow: 0 1px 0 #d97706, 0 3px 6px rgba(245, 158, 11, 0.3);
     }
 
-    /* Kawaii 3D Cards */
-    .card-kawaii-pink {
-      background: #ffffff;
-      border-radius: 1.75rem;
-      border: 3px solid #ffccd8;
-      box-shadow: 0 8px 24px rgba(255, 101, 132, 0.12), 0 3px 0 #ffd6e0;
-    }
-
-    .card-kawaii-blue {
-      background: #ffffff;
-      border-radius: 1.75rem;
-      border: 3px solid #bae6fd;
-      box-shadow: 0 8px 24px rgba(56, 189, 248, 0.12), 0 3px 0 #cbe9fe;
-    }
-
-    /* Keyframe Animations */
-    @keyframes bounceGentle {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-5px); }
-    }
-    .animate-bounce-gentle {
-      animation: bounceGentle 2.2s ease-in-out infinite;
-    }
-
-    /* Smooth Tap Effect */
     .tap-bounce {
-      transition: transform 0.1s ease;
+      transition: transform 0.12s ease;
     }
     .tap-bounce:active {
-      transform: scale(0.96);
+      transform: scale(0.94);
     }
 
     /* Custom Scrollbar */
@@ -180,6 +170,13 @@
       background: #fbcfe8;
       border-radius: 9999px;
     }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
   </style>
 </head>
 <body class="theme-manow">
@@ -188,6 +185,19 @@
   <!-- React Application Script -->
   <script type="text/babel">
     const { useState, useEffect, useRef, useMemo } = React;
+
+    // ========================================================
+    // EMBEDDED CONFIGURATIONS & KEYS (DEFAULT)
+    // ========================================================
+    const DEFAULT_GEMINI_KEY = atob('QVEuQWI4Uk42SnBMOVhxbjhEM0NrdjFDVzJZZlhzZ3RjYnNrNmVwZGE0M2Y2TkxCdS0tcXc=');
+    const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbw04nso-j-b4s0pwRGY9yfVg2L8bR7ZxKcPYNPRyIbjwps_ptWEmjR1F9W2P2QCluLT6w/exec';
+    const GEMINI_CANDIDATE_MODELS = [
+      'gemini-flash-lite-latest',
+      'gemini-3.5-flash-lite',
+      'gemini-3.5-flash',
+      'gemini-flash-latest',
+      'gemini-3.8-flash'
+    ];
 
     // ========================================================
     // SEPARATE CATEGORIES: EXPENSE vs INCOME
@@ -216,7 +226,6 @@
       const list = type === 'INCOME' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
       const found = list.find(c => c.name === name);
       if (found) return found;
-      // Fallback
       return { id: 'unknown', name, icon: type === 'INCOME' ? '💰' : '🛍️', color: '#64748b' };
     }
 
@@ -323,6 +332,121 @@
     }
 
     // ========================================================
+    // AI CHATBOT TRANSACTION PARSER (Gemini + Local Regex Fallback)
+    // ========================================================
+    function localRegexParse(text) {
+      const numMatch = text.match(/(\d+(?:\.\d+)?)/);
+      const amount = numMatch ? parseFloat(numMatch[1]) : 0;
+      if (amount <= 0) {
+        return {
+          isTransaction: false,
+          replyMessage: 'หมูอ้วนยังไม่เห็นจำนวนเงินเลยน้าอู๊ดๆ 🐷 ลองพิมพ์บอกใหม่ได้นะ เช่น "กินข้าว 60 บาท"'
+        };
+      }
+
+      const isIncome = /(เงินเดือน|โบนัส|ได้เงิน|รับเงิน|เพื่อนคืน|ขายของ|กำไร|เงินปันผล|ถูกหวย|โอนเข้า|รายรับ)/i.test(text);
+      const type = isIncome ? 'INCOME' : 'EXPENSE';
+
+      let category = type === 'INCOME' ? 'รายรับพิเศษ / อื่นๆ' : 'ค่าใช้จ่ายอื่นๆ';
+      let cleanMerchant = text.replace(/(\d+(?:\.\d+)?)/g, '').replace(/(บาท|บ\.|บ|thb)/gi, '').trim();
+      cleanMerchant = cleanMerchant.replace(/^(กิน|ซื้อ|จ่าย|เติม|ได้|รับ)/g, '').trim() || (type === 'INCOME' ? 'รายรับ' : 'ค่าใช้จ่าย');
+
+      if (type === 'EXPENSE') {
+        if (/(น้ำมัน|bts|mrt|แท็กซี่|วิน|รถเมล์|ทางด่วน|เดินทาง|ค่ารถ|grab|bolt)/i.test(text)) {
+          category = 'เดินทาง / น้ำมัน';
+        } else if (/(ค่าน้ำ|ค่าไฟ|ค่าเน็ต|บิล|ค่าห้อง|ค่าเช่า|ค่าโทรศัพท์)/i.test(text)) {
+          category = 'บิล & ค่าน้ำค่าไฟ';
+        } else if (/(ยา|หมอ|คลินิก|โรงพยาบาล|วิตามิน|หาหมอ)/i.test(text)) {
+          category = 'สุขภาพ / ยา / คลินิก';
+        } else if (/(หนัง|เกม|สังสรรค์|เหล้า|เบียร์|เที่ยว|คอนเสิร์ต|ปาร์ตี้)/i.test(text)) {
+          category = 'บันเทิง & สังสรรค์';
+        } else if (/(ของใช้|เซเว่น|shopee|lazada|ช้อป|เสื้อ|กางเกง|ของเล่น|ครีม)/i.test(text)) {
+          category = 'ของใช้ & ช้อปปิ้ง';
+        } else if (/(ข้าว|อาหาร|กะเพรา|ก๋วยเตี๋ยว|กาแฟ|ชา|หมูกระทะ|ส้มตำ|ขนม|เค้ก|เบเกอรี่|กิน|เครื่องดื่ม)/i.test(text) || (text.includes('น้ำ') && !text.includes('น้ำมัน') && !text.includes('ค่าน้ำ'))) {
+          category = 'อาหารและเครื่องดื่ม';
+        }
+      } else {
+        if (/เงินเดือน/i.test(text)) category = 'เงินเดือนประจำ';
+        else if (/ธุรกิจ|ขายของ|กำไร/i.test(text)) category = 'ธุรกิจ / ค้าขาย / กำไร';
+        else if (/โบนัส|คอมมิชชั่น/i.test(text)) category = 'โบนัส & คอมมิชชั่น';
+        else if (/คืน/i.test(text)) category = 'รับโอนเงิน / เพื่อนคืน';
+        else if (/ปันผล|ดอกเบี้ย/i.test(text)) category = 'เงินปันผล & ดอกเบี้ย';
+      }
+
+      return {
+        isTransaction: true,
+        type,
+        amount,
+        merchant: cleanMerchant,
+        category,
+        wallet: /โอน/i.test(text) ? 'โอนเงิน' : 'เงินสด',
+        note: '',
+        replyMessage: `หมูอ้วนช่วยจด ${cleanMerchant} ${amount.toLocaleString()} บาท เรียบร้อยแล้วน้า อู๊ดๆ! 🐷✨`
+      };
+    }
+
+    async function parseTransactionWithAI(userText, apiKey = DEFAULT_GEMINI_KEY) {
+      const cleanKey = apiKey || DEFAULT_GEMINI_KEY;
+      const prompt = `
+คุณคือ "หมูอ้วนช่วยจด" 🐷 ผู้ช่วยอัจฉริยะด้านการเงินและจดบันทึกรายรับรายจ่ายของแอป "เศรษฐีหมูอ้วน"
+ผู้ใช้พิมพ์ข้อความมา: "${userText}"
+
+หน้าที่ของคุณ:
+1. วิเคราะห์ว่าข้อความนี้เป็นการบันทึก "รายจ่าย" (EXPENSE) หรือ "รายรับ" (INCOME) หรือเป็นการสนทนาทั่วไป
+2. หากเป็นการบันทึก:
+   - isTransaction: true
+   - type: "EXPENSE" (จ่ายเงินออก) หรือ "INCOME" (รับเงินเข้า)
+   - amount: ตัวเลขยอดเงิน (number เช่น 65, 500, 35000)
+   - merchant: "ชื่อรายการ/ร้านค้า/สิ่งของ หรือแหล่งที่มาของเงิน (เช่น ข้าวกะเพราหมูกรอบ, กาแฟอเมซอน, เติมน้ำมัน, เงินเดือน)"
+   - category:
+     * หากเป็น EXPENSE ให้เลือกจาก: ['อาหารและเครื่องดื่ม', 'ของใช้ & ช้อปปิ้ง', 'เดินทาง / น้ำมัน', 'บิล & ค่าน้ำค่าไฟ', 'สุขภาพ / ยา / คลินิก', 'บันเทิง & สังสรรค์', 'ค่าใช้จ่ายอื่นๆ']
+     * หากเป็น INCOME ให้เลือกจาก: ['เงินเดือนประจำ', 'ธุรกิจ / ค้าขาย / กำไร', 'โบนัส & คอมมิชชั่น', 'รับโอนเงิน / เพื่อนคืน', 'เงินปันผล & ดอกเบี้ย', 'รายรับพิเศษ / อื่นๆ']
+   - wallet: 'เงินสด', 'โอนเงิน', 'TrueMoney', 'บัตรเครดิต' (ถ้าไม่ได้ระบุ ให้ใช้ 'เงินสด')
+   - note: บันทึกช่วยจำเพิ่มเติม
+   - replyMessage: ข้อความตอบกลับแบบน่ารัก ขี้เล่น เป็นกันเอง สไตล์น้องหมูอ้วน มีคำว่า "อู๊ดๆ 🐷" หรือแซวและให้กำลังใจ
+
+ให้ตอบกลับเป็น JSON Object เท่านั้น:
+{
+  "isTransaction": true,
+  "type": "EXPENSE",
+  "amount": 0.0,
+  "merchant": "ชื่อรายการ",
+  "category": "ชื่อหมวดหมู่",
+  "wallet": "เงินสด",
+  "note": "",
+  "replyMessage": "ข้อความตอบกลับของน้องหมูอ้วน"
+}
+`;
+
+      if (cleanKey) {
+        for (const model of GEMINI_CANDIDATE_MODELS) {
+          try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${cleanKey}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { responseMimeType: 'application/json' }
+              })
+            });
+            if (res.ok) {
+              const data = await res.json();
+              const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (text) {
+                return JSON.parse(text.trim());
+              }
+            }
+          } catch (e) {
+            console.warn(`Model ${model} failed for chat:`, e);
+          }
+        }
+      }
+
+      // Local fallback
+      return localRegexParse(userText);
+    }
+
+    // ========================================================
     // COMPONENT: MASCOT (PNG Level 1 - 10)
     // ========================================================
     function PigMascot({ level = 1, isBoy = false, size = 'lg', onClick }) {
@@ -342,7 +466,7 @@
         <div 
           onClick={onClick}
           className={`relative inline-flex items-center justify-center select-none ${sizeClasses[size]} animate-bounce-gentle cursor-pointer group shrink-0`}
-          title="เศรษฐีหมูอ้วน (แตะเพื่อสุ่มเปลี่ยนรูป)"
+          title="เศรษฐีหมูอ้วน (แตะเพื่อสลับรูป)"
         >
           {!imgFailed ? (
             <img
@@ -389,6 +513,143 @@
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
             <span className="text-sm font-mono font-black">{Math.round((value / (max || 1)) * 100)}%</span>
             <span className="text-[9px] text-slate-500 font-bold">{label}</span>
+          </div>
+        </div>
+      );
+    }
+
+    // ========================================================
+    // COMPONENT: DONUT / PIE CHART (Kawaii SVG Interactive)
+    // ========================================================
+    function DonutChart({ data, total, title, type = 'EXPENSE' }) {
+      const [hoveredIdx, setHoveredIdx] = useState(null);
+      const size = 190;
+      const strokeWidth = 26;
+      const radius = (size - strokeWidth) / 2;
+      const circumference = 2 * Math.PI * radius;
+
+      if (!data || data.length === 0 || total === 0) {
+        return (
+          <div className="py-8 text-center text-slate-400 text-xs font-bold">
+            ยังไม่มีข้อมูลบันทึกในหมวดนี้
+          </div>
+        );
+      }
+
+      let accumulatedFraction = 0;
+
+      return (
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 py-2">
+            {/* SVG Donut Circle */}
+            <div className="relative w-44 h-44 flex items-center justify-center shrink-0">
+              <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="transform -rotate-90">
+                <circle
+                  cx={size / 2}
+                  cy={size / 2}
+                  r={radius}
+                  fill="transparent"
+                  stroke="#f1f5f9"
+                  strokeWidth={strokeWidth}
+                />
+                {data.map((item, idx) => {
+                  const fraction = item.amount / total;
+                  const strokeDasharray = `${fraction * circumference} ${circumference}`;
+                  const strokeDashoffset = -(accumulatedFraction * circumference);
+                  accumulatedFraction += fraction;
+                  const isHovered = hoveredIdx === idx;
+
+                  return (
+                    <circle
+                      key={item.name}
+                      cx={size / 2}
+                      cy={size / 2}
+                      r={radius}
+                      fill="transparent"
+                      stroke={item.meta.color || (type === 'INCOME' ? '#10b981' : '#ff6584')}
+                      strokeWidth={isHovered ? strokeWidth + 5 : strokeWidth}
+                      strokeDasharray={strokeDasharray}
+                      strokeDashoffset={strokeDashoffset}
+                      className="transition-all duration-300 cursor-pointer"
+                      onMouseEnter={() => setHoveredIdx(idx)}
+                      onMouseLeave={() => setHoveredIdx(null)}
+                    />
+                  );
+                })}
+              </svg>
+
+              {/* Center Info */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-2">
+                {hoveredIdx !== null && data[hoveredIdx] ? (
+                  <>
+                    <span className="text-xl">{data[hoveredIdx].meta.icon}</span>
+                    <span className="text-[11px] font-black text-slate-700 truncate max-w-[110px]">
+                      {data[hoveredIdx].name}
+                    </span>
+                    <span className={`text-xs font-mono font-black ${type === 'INCOME' ? 'text-emerald-600' : 'text-rose-500'}`}>
+                      ฿{data[hoveredIdx].amount.toLocaleString('th-TH', { maximumFractionDigits: 0 })}
+                    </span>
+                    <span className="text-[10px] font-bold text-slate-400">
+                      {data[hoveredIdx].percent}%
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-[10px] text-slate-400 font-bold">{title}</span>
+                    <span className={`text-sm font-mono font-black ${type === 'INCOME' ? 'text-emerald-600' : 'text-rose-500'}`}>
+                      ฿{total.toLocaleString('th-TH', { maximumFractionDigits: 0 })}
+                    </span>
+                    <span className="text-[9px] text-slate-400">
+                      {data.length} หมวดหมู่
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Legend / Breakdown List with Progress Bars */}
+            <div className="flex-1 w-full space-y-2">
+              {data.map((item, idx) => {
+                const isHovered = hoveredIdx === idx;
+                return (
+                  <div
+                    key={item.name}
+                    onMouseEnter={() => setHoveredIdx(idx)}
+                    onMouseLeave={() => setHoveredIdx(null)}
+                    className={`p-2 rounded-xl transition-all cursor-pointer border ${
+                      isHovered
+                        ? (type === 'INCOME' ? 'bg-emerald-50/80 border-emerald-300 shadow-xs' : 'bg-rose-50/80 border-rose-300 shadow-xs')
+                        : 'bg-slate-50/70 border-slate-100 hover:bg-slate-100/70'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <div className="flex items-center gap-1.5 font-bold text-slate-700">
+                        <span>{item.meta.icon}</span>
+                        <span className="truncate max-w-[130px]">{item.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={`font-mono font-black ${type === 'INCOME' ? 'text-emerald-600' : 'text-slate-800'}`}>
+                          {type === 'INCOME' ? '+' : '-'}฿{item.amount.toLocaleString('th-TH', { maximumFractionDigits: 0 })}
+                        </span>
+                        <span className="text-[10px] font-bold text-slate-500 bg-white px-1.5 py-0.5 rounded border border-slate-200">
+                          {item.percent}%
+                        </span>
+                      </div>
+                    </div>
+                    {/* Visual Bar */}
+                    <div className="w-full h-1.5 bg-slate-200/60 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${item.percent}%`,
+                          backgroundColor: item.meta.color || (type === 'INCOME' ? '#10b981' : '#ff6584')
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       );
@@ -484,6 +745,7 @@
     // ========================================================
     function StatsView({ transactions, isBoy, cardClass }) {
       const [period, setPeriod] = useState('daily'); // 'daily' | 'weekly' | 'monthly'
+      const [chartMode, setChartMode] = useState('EXPENSE'); // 'EXPENSE' | 'INCOME' | 'ALL'
 
       // Filtered data based on period
       const chartData = useMemo(() => {
@@ -585,8 +847,18 @@
       const totalPeriodExpense = chartData.reduce((s, d) => s + d.expense, 0);
       const periodBalance = totalPeriodIncome - totalPeriodExpense;
 
-      // Max value for bar heights
-      const maxBarValue = Math.max(...chartData.map(d => Math.max(d.income, d.expense)), 100);
+      // Max value for bar heights based on selected mode
+      const maxBarValue = useMemo(() => {
+        if (chartMode === 'EXPENSE') {
+          return Math.max(...chartData.map(d => d.expense), 50);
+        }
+        if (chartMode === 'INCOME') {
+          return Math.max(...chartData.map(d => d.income), 50);
+        }
+        return Math.max(...chartData.map(d => Math.max(d.income, d.expense)), 50);
+      }, [chartData, chartMode]);
+
+      const periodLabel = period === 'daily' ? 'รายวัน' : period === 'weekly' ? 'รายสัปดาห์' : 'รายเดือน';
 
       return (
         <div className="space-y-4 animate-in fade-in">
@@ -613,13 +885,13 @@
 
           {/* Period KPI Summary Cards */}
           <div className="grid grid-cols-3 gap-2 text-center">
-            <div className={`p-3 ${cardClass}`}>
+            <div className={`p-3 ${cardClass} ${chartMode === 'INCOME' ? 'ring-2 ring-emerald-400 bg-emerald-50/40' : ''}`}>
               <span className="text-[10px] text-slate-400 font-bold block">🟢 รวมรายรับ</span>
               <span className="font-mono font-black text-xs sm:text-sm text-emerald-600">
                 +฿{totalPeriodIncome.toLocaleString('th-TH', { maximumFractionDigits: 0 })}
               </span>
             </div>
-            <div className={`p-3 ${cardClass}`}>
+            <div className={`p-3 ${cardClass} ${chartMode === 'EXPENSE' ? 'ring-2 ring-rose-400 bg-rose-50/40' : ''}`}>
               <span className="text-[10px] text-slate-400 font-bold block">🔴 รวมรายจ่าย</span>
               <span className="font-mono font-black text-xs sm:text-sm text-rose-500">
                 -฿{totalPeriodExpense.toLocaleString('th-TH', { maximumFractionDigits: 0 })}
@@ -633,18 +905,50 @@
             </div>
           </div>
 
-          {/* Comparative Bar Chart: Green (Income) vs Red (Expense) */}
+          {/* Bar Chart Section */}
           <div className={`p-5 ${cardClass} space-y-4`}>
-            <div className="flex items-center justify-between">
+            {/* Header & Chart Mode Filter */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
               <div>
                 <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
-                  <span>📈 กราฟเปรียบเทียบ รายรับ vs รายจ่าย</span>
+                  <span>📈 กราฟแนวโน้ม{chartMode === 'EXPENSE' ? 'รายจ่าย' : chartMode === 'INCOME' ? 'รายรับ' : 'เปรียบเทียบ'} ({periodLabel})</span>
                 </h3>
-                <p className="text-[10px] text-slate-400">แท่งเขียว (รายรับ) เทียบ แท่งแดง (รายจ่าย)</p>
+                <p className="text-[10px] text-slate-400">
+                  {chartMode === 'EXPENSE' && 'แสดงแท่งรายจ่ายที่เกิดขึ้นในแต่ละช่วงเวลา'}
+                  {chartMode === 'INCOME' && 'แสดงแท่งรายรับในแต่ละช่วงเวลา'}
+                  {chartMode === 'ALL' && 'แท่งเขียว (รายรับ) เทียบ แท่งแดง (รายจ่าย)'}
+                </p>
               </div>
-              <div className="flex items-center gap-2 text-[10px] font-bold">
-                <span className="flex items-center gap-1 text-emerald-600"><span className="w-2.5 h-2.5 rounded bg-emerald-500 inline-block"></span> รายรับ</span>
-                <span className="flex items-center gap-1 text-rose-500"><span className="w-2.5 h-2.5 rounded bg-rose-500 inline-block"></span> รายจ่าย</span>
+
+              {/* Chart Mode Toggle Pills */}
+              <div className="flex bg-slate-100 p-1 rounded-2xl gap-1 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setChartMode('EXPENSE')}
+                  className={`px-2.5 py-1 rounded-xl text-xs font-black transition-all ${
+                    chartMode === 'EXPENSE' ? 'bg-rose-500 text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  🔴 เฉพาะรายจ่าย
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setChartMode('INCOME')}
+                  className={`px-2.5 py-1 rounded-xl text-xs font-black transition-all ${
+                    chartMode === 'INCOME' ? 'bg-emerald-500 text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  🟢 เฉพาะรายรับ
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setChartMode('ALL')}
+                  className={`px-2.5 py-1 rounded-xl text-xs font-black transition-all ${
+                    chartMode === 'ALL' ? (isBoy ? 'bg-sky-500 text-white shadow-xs' : 'bg-pink-500 text-white shadow-xs') : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  ⚖️ เทียบทั้งคู่
+                </button>
               </div>
             </div>
 
@@ -658,22 +962,43 @@
                   <div key={d.key} className="flex-1 flex flex-col items-center h-full justify-end group relative">
                     {/* Tooltip on hover */}
                     <div className="absolute -top-10 bg-slate-800 text-white text-[9px] px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 whitespace-nowrap shadow-lg">
-                      รับ: +฿{d.income.toFixed(0)} | จ่าย: -฿{d.expense.toFixed(0)}
+                      {chartMode === 'EXPENSE' && `รายจ่าย: -฿${d.expense.toFixed(0)}`}
+                      {chartMode === 'INCOME' && `รายรับ: +฿${d.income.toFixed(0)}`}
+                      {chartMode === 'ALL' && `รับ: +฿${d.income.toFixed(0)} | จ่าย: -฿${d.expense.toFixed(0)}`}
                     </div>
 
+                    {/* Bar Elements */}
                     <div className="w-full flex items-end justify-center gap-1 h-36">
-                      {/* Income Bar (Green) */}
-                      <div
-                        className="w-1/2 max-w-[14px] bg-emerald-400 hover:bg-emerald-500 rounded-t-md transition-all duration-500"
-                        style={{ height: `${Math.max(incomeHeight, 4)}%` }}
-                        title={`รายรับ: ฿${d.income.toFixed(2)}`}
-                      />
-                      {/* Expense Bar (Red) */}
-                      <div
-                        className="w-1/2 max-w-[14px] bg-rose-400 hover:bg-rose-500 rounded-t-md transition-all duration-500"
-                        style={{ height: `${Math.max(expenseHeight, 4)}%` }}
-                        title={`รายจ่าย: ฿${d.expense.toFixed(2)}`}
-                      />
+                      {chartMode === 'EXPENSE' && (
+                        <div
+                          className="w-full max-w-[22px] sm:max-w-[28px] bg-rose-400 hover:bg-rose-500 rounded-t-lg transition-all duration-500 shadow-xs"
+                          style={{ height: `${Math.max(expenseHeight, d.expense > 0 ? 6 : 2)}%`, opacity: d.expense > 0 ? 1 : 0.25 }}
+                          title={`รายจ่าย: ฿${d.expense.toFixed(2)}`}
+                        />
+                      )}
+
+                      {chartMode === 'INCOME' && (
+                        <div
+                          className="w-full max-w-[22px] sm:max-w-[28px] bg-emerald-400 hover:bg-emerald-500 rounded-t-lg transition-all duration-500 shadow-xs"
+                          style={{ height: `${Math.max(incomeHeight, d.income > 0 ? 6 : 2)}%`, opacity: d.income > 0 ? 1 : 0.25 }}
+                          title={`รายรับ: ฿${d.income.toFixed(2)}`}
+                        />
+                      )}
+
+                      {chartMode === 'ALL' && (
+                        <>
+                          <div
+                            className="w-1/2 max-w-[14px] bg-emerald-400 hover:bg-emerald-500 rounded-t-md transition-all duration-500"
+                            style={{ height: `${Math.max(incomeHeight, d.income > 0 ? 6 : 2)}%`, opacity: d.income > 0 ? 1 : 0.25 }}
+                            title={`รายรับ: ฿${d.income.toFixed(2)}`}
+                          />
+                          <div
+                            className="w-1/2 max-w-[14px] bg-rose-400 hover:bg-rose-500 rounded-t-md transition-all duration-500"
+                            style={{ height: `${Math.max(expenseHeight, d.expense > 0 ? 6 : 2)}%`, opacity: d.expense > 0 ? 1 : 0.25 }}
+                            title={`รายจ่าย: ฿${d.expense.toFixed(2)}`}
+                          />
+                        </>
+                      )}
                     </div>
                     <span className="text-[9px] font-bold text-slate-400 mt-2 truncate w-full text-center">
                       {d.label}
@@ -684,82 +1009,363 @@
             </div>
           </div>
 
-          {/* Expense Category Breakdown */}
-          <div className={`p-5 ${cardClass} space-y-3`}>
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-              <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
-                <span>🛒 สัดส่วนรายจ่ายแยกตามหมวดหมู่</span>
-              </h3>
-              <span className="text-xs font-mono font-black text-rose-500">
-                รวม ฿{expenseByCategory.reduce((s, c) => s + c.amount, 0).toLocaleString()}
-              </span>
+          {/* Expense Category Donut / Breakdown */}
+          {(chartMode === 'EXPENSE' || chartMode === 'ALL') && (
+            <div className={`p-5 ${cardClass} space-y-3`}>
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
+                  <span>🍩 สัดส่วนรายจ่ายแยกตามหมวดหมู่ (Donut Chart)</span>
+                </h3>
+                <span className="text-xs font-mono font-black text-rose-500">
+                  รวม ฿{expenseByCategory.reduce((s, c) => s + c.amount, 0).toLocaleString()}
+                </span>
+              </div>
+
+              <DonutChart
+                data={expenseByCategory}
+                total={expenseByCategory.reduce((s, c) => s + c.amount, 0)}
+                title="รวมรายจ่าย"
+                type="EXPENSE"
+              />
+            </div>
+          )}
+
+          {/* Income Category Donut / Breakdown */}
+          {(chartMode === 'INCOME' || chartMode === 'ALL') && (
+            <div className={`p-5 ${cardClass} space-y-3`}>
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
+                  <span>🍩 สัดส่วนรายรับแยกตามประเภท (Donut Chart)</span>
+                </h3>
+                <span className="text-xs font-mono font-black text-emerald-600">
+                  รวม ฿{incomeByCategory.reduce((s, c) => s + c.amount, 0).toLocaleString()}
+                </span>
+              </div>
+
+              <DonutChart
+                data={incomeByCategory}
+                total={incomeByCategory.reduce((s, c) => s + c.amount, 0)}
+                title="รวมรายรับ"
+                type="INCOME"
+              />
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ========================================================
+    // COMPONENT: AI CHATBOT VIEW ("หมูอ้วนช่วยจด")
+    // ========================================================
+    function ChatView({ currentUser, isBoy, cardClass, primaryBtnClass, settings, onSaveTransaction, onDeleteTransaction, transactions }) {
+      const [messages, setMessages] = useState(() => {
+        const raw = localStorage.getItem(`setthi_chat_${currentUser.username}`);
+        if (raw) {
+          try { return JSON.parse(raw); } catch (e) {}
+        }
+        return [
+          {
+            id: 'msg-init',
+            sender: 'assistant',
+            text: 'สวัสดีจ้า! หมูอ้วนช่วยจดพร้อมแล้วนะอู๊ดๆ 🐷💖 มีรายการอะไรอยากให้ช่วยบันทึก พิมพ์บอกมาได้เลยน้า เช่น "กินข้าวกะเพรา 65", "ซื้อกาแฟ 50", หรือ "ได้เงินเดือน 35000"',
+            time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+          }
+        ];
+      });
+
+      const [inputVal, setInputVal] = useState('');
+      const [isProcessing, setIsProcessing] = useState(false);
+      const messagesEndRef = useRef(null);
+
+      // Save chat to localStorage
+      useEffect(() => {
+        localStorage.setItem(`setthi_chat_${currentUser.username}`, JSON.stringify(messages));
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, [messages, currentUser]);
+
+      const handleClearChat = () => {
+        if (confirm('ต้องการล้างประวัติการคุยกับหมูอ้วนใช่หรือไม่? (รายการที่บันทึกไปแล้วจะไม่ถูกลบ)')) {
+          const reset = [
+            {
+              id: `msg-${Date.now()}`,
+              sender: 'assistant',
+              text: 'ล้างห้องแชทเรียบร้อยแล้วจ้า! เริ่มต้นจดรายการใหม่บอกหมูอ้วนได้เลยนะอู๊ดๆ 🐷✨',
+              time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+            }
+          ];
+          setMessages(reset);
+          localStorage.setItem(`setthi_chat_${currentUser.username}`, JSON.stringify(reset));
+        }
+      };
+
+      const handleSendMessage = async (textToSend) => {
+        const text = (textToSend || inputVal).trim();
+        if (!text || isProcessing) return;
+
+        setInputVal('');
+        const userMsg = {
+          id: `usr-${Date.now()}`,
+          sender: 'user',
+          text: text,
+          time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+        };
+        setMessages(prev => [...prev, userMsg]);
+        setIsProcessing(true);
+
+        try {
+          const apiKey = settings.geminiApiKey || DEFAULT_GEMINI_KEY;
+          const parsed = await parseTransactionWithAI(text, apiKey);
+
+          if (parsed && parsed.isTransaction && parsed.amount > 0) {
+            const now = new Date();
+            const ymd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+
+            const txn = {
+              id: `TXN-AI-${Date.now()}`,
+              user: currentUser.username,
+              date: ymd,
+              time: timeStr,
+              type: parsed.type === 'INCOME' ? 'INCOME' : 'EXPENSE',
+              category: parsed.category || (parsed.type === 'INCOME' ? 'รายรับพิเศษ / อื่นๆ' : 'ค่าใช้จ่ายอื่นๆ'),
+              amount: Number(parsed.amount),
+              wallet: parsed.wallet || 'เงินสด',
+              merchant: parsed.merchant || (parsed.type === 'INCOME' ? 'รายรับ' : 'ค่าใช้จ่าย'),
+              note: parsed.note ? `[หมูอ้วน AI] ${parsed.note}` : '[หมูอ้วน AI]',
+              isCategorized: true
+            };
+
+            await onSaveTransaction(txn);
+
+            const aiMsg = {
+              id: `ai-${Date.now()}`,
+              sender: 'assistant',
+              text: parsed.replyMessage || `จด ${txn.merchant} ${txn.amount.toLocaleString()} บาท เรียบร้อยแล้วอู๊ดๆ! 🐷✨`,
+              time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+              savedTxn: txn
+            };
+            setMessages(prev => [...prev, aiMsg]);
+          } else {
+            const aiMsg = {
+              id: `ai-${Date.now()}`,
+              sender: 'assistant',
+              text: parsed?.replyMessage || 'หมูอ้วนรับทราบจ้า! ถ้ามีรายการใช้จ่ายหรือเงินเข้า พิมพ์บอกได้เลยนะ เช่น "กินส้มตำ 80"',
+              time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+            };
+            setMessages(prev => [...prev, aiMsg]);
+          }
+        } catch (err) {
+          console.error(err);
+          const fallback = localRegexParse(text);
+          if (fallback.isTransaction && fallback.amount > 0) {
+            const now = new Date();
+            const ymd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            const txn = {
+              id: `TXN-AI-${Date.now()}`,
+              user: currentUser.username,
+              date: ymd,
+              time: now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+              type: fallback.type,
+              category: fallback.category,
+              amount: Number(fallback.amount),
+              wallet: fallback.wallet,
+              merchant: fallback.merchant,
+              note: '[หมูอ้วน AI สำรอง]',
+              isCategorized: true
+            };
+            await onSaveTransaction(txn);
+            setMessages(prev => [...prev, {
+              id: `ai-${Date.now()}`,
+              sender: 'assistant',
+              text: fallback.replyMessage,
+              time: now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+              savedTxn: txn
+            }]);
+          } else {
+            setMessages(prev => [...prev, {
+              id: `ai-${Date.now()}`,
+              sender: 'assistant',
+              text: 'หมูอ้วนได้รับข้อความแล้ว แต่ยังหาจำนวนเงินไม่เจออู๊ดๆ 🐷 ลองพิมพ์ใหม่เป็น "กินข้าว 60 บาท" ดูนะจ๊ะ',
+              time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+            }]);
+          }
+        } finally {
+          setIsProcessing(false);
+        }
+      };
+
+      return (
+        <div className={`flex flex-col h-[75vh] max-h-[680px] ${cardClass} p-3 sm:p-4 relative overflow-hidden animate-in fade-in`}>
+          {/* Chat Header */}
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100 shrink-0">
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-2xl bg-pink-100 border-2 border-pink-200 overflow-hidden p-0.5 shadow-xs flex items-center justify-center">
+                <img
+                  src={`./mascots/${isBoy ? 'maxnum' : 'manow'}_lv3.png`}
+                  alt="Mascot"
+                  className="w-full h-full object-contain"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <h3 className="text-sm font-black text-slate-800">หมูอ้วนช่วยจด AI 🐷</h3>
+                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                </div>
+                <p className="text-[10px] text-slate-400 font-bold">พิมพ์อะไรมาก็บันทึกให้ทันที อัจฉริยะ 100%</p>
+              </div>
             </div>
 
-            {expenseByCategory.length === 0 ? (
-              <p className="text-xs text-slate-400 text-center py-4">ยังไม่มีบันทึกรายจ่าย</p>
-            ) : (
-              <div className="space-y-2.5">
-                {expenseByCategory.map((c) => (
-                  <div key={c.name} className="space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-1.5 font-bold text-slate-700">
-                        <span>{c.meta.icon}</span>
-                        <span>{c.name}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-black text-slate-700">฿{c.amount.toFixed(2)}</span>
-                        <span className="text-[10px] font-bold text-slate-400 w-8 text-right">{c.percent}%</span>
-                      </div>
-                    </div>
-                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{ width: `${c.percent}%`, backgroundColor: c.meta.color || '#ff6584' }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <button
+              onClick={handleClearChat}
+              className="text-[11px] font-bold text-slate-400 hover:text-rose-500 px-2 py-1 rounded-lg hover:bg-slate-100 transition-colors"
+              title="ล้างแชท"
+            >
+              🗑️ ล้างแชท
+            </button>
           </div>
 
-          {/* Income Source Breakdown */}
-          <div className={`p-5 ${cardClass} space-y-3`}>
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-              <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
-                <span>💰 สัดส่วนรายรับแยกตามประเภท</span>
-              </h3>
-              <span className="text-xs font-mono font-black text-emerald-600">
-                รวม ฿{incomeByCategory.reduce((s, c) => s + c.amount, 0).toLocaleString()}
-              </span>
-            </div>
+          {/* Messages Scroll Area */}
+          <div className="flex-1 overflow-y-auto space-y-3 py-3 pr-1">
+            {messages.map((m) => {
+              const isUser = m.sender === 'user';
+              return (
+                <div
+                  key={m.id}
+                  className={`flex gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}
+                >
+                  {!isUser && (
+                    <div className="w-7 h-7 rounded-xl bg-pink-50 border border-pink-200 overflow-hidden shrink-0 mt-1 flex items-center justify-center">
+                      <span className="text-base">🐷</span>
+                    </div>
+                  )}
 
-            {incomeByCategory.length === 0 ? (
-              <p className="text-xs text-slate-400 text-center py-4">ยังไม่มีบันทึกรายรับ</p>
-            ) : (
-              <div className="space-y-2.5">
-                {incomeByCategory.map((c) => (
-                  <div key={c.name} className="space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-1.5 font-bold text-slate-700">
-                        <span>{c.meta.icon}</span>
-                        <span>{c.name}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-black text-emerald-600">+฿{c.amount.toFixed(2)}</span>
-                        <span className="text-[10px] font-bold text-slate-400 w-8 text-right">{c.percent}%</span>
-                      </div>
+                  <div className={`max-w-[85%] sm:max-w-[75%] space-y-1.5 ${isUser ? 'items-end' : 'items-start'}`}>
+                    <div
+                      className={`p-3 rounded-2xl text-xs font-medium leading-relaxed shadow-xs ${
+                        isUser
+                          ? isBoy
+                            ? 'bg-sky-500 text-white rounded-br-xs'
+                            : 'bg-pink-500 text-white rounded-br-xs'
+                          : 'bg-white border-2 border-slate-100 text-slate-800 rounded-bl-xs'
+                      }`}
+                    >
+                      <p className="whitespace-pre-wrap">{m.text}</p>
+
+                      {/* Embedded Transaction Card if saved */}
+                      {m.savedTxn && (
+                        <div className="mt-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 space-y-1.5 font-normal">
+                          <div className="flex items-center justify-between">
+                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full text-white ${
+                              m.savedTxn.type === 'INCOME' ? 'bg-emerald-500' : 'bg-rose-500'
+                            }`}>
+                              {m.savedTxn.type === 'INCOME' ? '🟢 รายรับ' : '🔴 รายจ่าย'}
+                            </span>
+                            <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
+                              <span>✅ บันทึกแล้ว</span>
+                            </span>
+                          </div>
+
+                          <div className="flex items-center justify-between text-xs pt-1">
+                            <div className="font-bold text-slate-700">
+                              <span>{m.savedTxn.merchant}</span>
+                              <span className="text-[10px] text-slate-400 block font-normal">{m.savedTxn.category}</span>
+                            </div>
+                            <div className="text-right">
+                              <span className={`font-mono font-black text-sm ${
+                                m.savedTxn.type === 'INCOME' ? 'text-emerald-600' : 'text-rose-500'
+                              }`}>
+                                {m.savedTxn.type === 'INCOME' ? '+' : '-'}฿{m.savedTxn.amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 text-[10px] text-slate-400">
+                            <span>💳 {m.savedTxn.wallet || 'เงินสด'}</span>
+                            <button
+                              onClick={() => {
+                                if (confirm(`ต้องการลบรายการ "${m.savedTxn.merchant}" ใช่หรือไม่?`)) {
+                                  onDeleteTransaction(m.savedTxn.id);
+                                  m.savedTxn.deleted = true;
+                                  setMessages([...messages]);
+                                }
+                              }}
+                              className="text-rose-500 hover:text-rose-700 font-bold hover:underline"
+                            >
+                              {m.savedTxn.deleted ? '(ลบแล้ว)' : '🗑️ ยกเลิกรายการนี้'}
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-emerald-500 transition-all duration-500"
-                        style={{ width: `${c.percent}%` }}
-                      />
-                    </div>
+
+                    <span className={`text-[9px] text-slate-400 block px-1 ${isUser ? 'text-right' : 'text-left'}`}>
+                      {m.time}
+                    </span>
                   </div>
-                ))}
+                </div>
+              );
+            })}
+
+            {isProcessing && (
+              <div className="flex gap-2 items-center text-xs font-bold text-slate-500 animate-pulse pl-9 py-1">
+                <span className="text-lg animate-bounce">🐽</span>
+                <span>หมูอ้วนกำลังคิดและจดบันทึกลงสมุด...</span>
               </div>
             )}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Suggestion Chips */}
+          <div className="shrink-0 pt-2 border-t border-slate-100 space-y-2">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 text-[11px]">
+              <span className="text-slate-400 font-bold text-[10px] shrink-0">กดปุ๊บจดปั๊บ:</span>
+              {[
+                '🍜 ข้าวกะเพรา 60',
+                '☕ กาแฟ 50',
+                '🛒 ช้อปปิ้ง 350',
+                '🚗 น้ำมัน 800',
+                '💰 เงินเดือน 35000',
+                '💸 เพื่อนคืนเงิน 300'
+              ].map((chip) => (
+                <button
+                  key={chip}
+                  type="button"
+                  disabled={isProcessing}
+                  onClick={() => handleSendMessage(chip)}
+                  className="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold whitespace-nowrap tap-bounce shrink-0"
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+
+            {/* Input Form */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSendMessage();
+              }}
+              className="flex items-center gap-2"
+            >
+              <input
+                type="text"
+                value={inputVal}
+                onChange={(e) => setInputVal(e.target.value)}
+                disabled={isProcessing}
+                placeholder="พิมพ์บอกหมูอ้วน เช่น 'กินข้าวเที่ยง 65', 'เงินเดือนเข้า 30000'..."
+                className="flex-1 text-xs bg-slate-50 border-2 border-slate-200 focus:border-pink-400 rounded-2xl px-3.5 py-2.5 outline-none font-medium"
+              />
+              <button
+                type="submit"
+                disabled={isProcessing || !inputVal.trim()}
+                className={`px-4 py-2.5 ${primaryBtnClass} text-xs font-black shadow-md shrink-0 flex items-center gap-1 disabled:opacity-50`}
+              >
+                <span>🚀</span>
+                <span>ส่ง</span>
+              </button>
+            </form>
           </div>
         </div>
       );
@@ -789,14 +1395,20 @@
 
       // Settings partitioned per user
       const [settings, setSettings] = useState(() => {
-        if (!currentUser) return { dailyBudget: 600, monthlyLimit: 20000, geminiApiKey: '', googleAppsScriptUrl: '' };
+        if (!currentUser) return {
+          dailyBudget: 600,
+          monthlyLimit: 20000,
+          geminiApiKey: DEFAULT_GEMINI_KEY,
+          googleAppsScriptUrl: DEFAULT_GAS_URL
+        };
         const raw = localStorage.getItem(`setthi_settings_${currentUser.username}`);
-        return raw ? JSON.parse(raw) : {
-          geminiApiKey: '',
-          googleAppsScriptUrl: '',
-          dailyBudget: currentUser.username === 'maxnum' ? 600 : 500,
-          monthlyLimit: currentUser.username === 'maxnum' ? 20000 : 18000,
-          streakCount: 3
+        const parsed = raw ? JSON.parse(raw) : {};
+        return {
+          geminiApiKey: parsed.geminiApiKey || DEFAULT_GEMINI_KEY,
+          googleAppsScriptUrl: parsed.googleAppsScriptUrl || DEFAULT_GAS_URL,
+          dailyBudget: parsed.dailyBudget || (currentUser.username === 'maxnum' ? 600 : 500),
+          monthlyLimit: parsed.monthlyLimit || (currentUser.username === 'maxnum' ? 20000 : 18000),
+          streakCount: parsed.streakCount || 3
         };
       });
 
@@ -808,7 +1420,7 @@
         return currentUser.username === 'maxnum' ? DEFAULT_TRANSACTIONS_MAXNUM : DEFAULT_TRANSACTIONS_MANOW;
       });
 
-      // Active view tab: 'home' | 'stats'
+      // Active view tab: 'home' | 'chat' | 'stats'
       const [activeTab, setActiveTab] = useState('home');
 
       // Selected Date
@@ -818,6 +1430,11 @@
       // Mascot reroll seed
       const [mascotRerollSeed, setMascotRerollSeed] = useState(0);
       const mascotLevel = getLevelForDate(selectedDate, mascotRerollSeed);
+
+      // Home Quick AI input state
+      const [homeChatInput, setHomeChatInput] = useState('');
+      const [homeChatLoading, setHomeChatLoading] = useState(false);
+      const [homeChatToast, setHomeChatToast] = useState('');
 
       // Modals
       const [showSettings, setShowSettings] = useState(false);
@@ -836,12 +1453,13 @@
           setTransactions(rawTxns ? JSON.parse(rawTxns) : (currentUser.username === 'maxnum' ? DEFAULT_TRANSACTIONS_MAXNUM : DEFAULT_TRANSACTIONS_MANOW));
 
           const rawSet = localStorage.getItem(`setthi_settings_${currentUser.username}`);
-          setSettings(rawSet ? JSON.parse(rawSet) : {
-            geminiApiKey: '',
-            googleAppsScriptUrl: '',
-            dailyBudget: currentUser.username === 'maxnum' ? 600 : 500,
-            monthlyLimit: currentUser.username === 'maxnum' ? 20000 : 18000,
-            streakCount: 3
+          const parsed = rawSet ? JSON.parse(rawSet) : {};
+          setSettings({
+            geminiApiKey: parsed.geminiApiKey || DEFAULT_GEMINI_KEY,
+            googleAppsScriptUrl: parsed.googleAppsScriptUrl || DEFAULT_GAS_URL,
+            dailyBudget: parsed.dailyBudget || (currentUser.username === 'maxnum' ? 600 : 500),
+            monthlyLimit: parsed.monthlyLimit || (currentUser.username === 'maxnum' ? 20000 : 18000),
+            streakCount: parsed.streakCount || 3
           });
         }
       }, [currentUser]);
@@ -895,14 +1513,10 @@
         setSelectedDate(current.toISOString().split('T')[0]);
       };
 
-      // Gemini Vision OCR
+      // Gemini Vision OCR for Slip & Receipt
       const handleImageFile = async (file) => {
         if (!file) return;
-        if (!settings.geminiApiKey) {
-          alert('กรุณากรอก Gemini API Key ในหน้าตั้งค่า ⚙️ ก่อนสแกนสลิปนะอู๊ด!');
-          setShowSettings(true);
-          return;
-        }
+        const apiKey = settings.geminiApiKey || DEFAULT_GEMINI_KEY;
 
         const reader = new FileReader();
         reader.onload = async (e) => {
@@ -926,30 +1540,45 @@
   "slipRef": "เลขอ้างอิงสลิป"
 }`;
 
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${settings.geminiApiKey}`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{
-                  parts: [
-                    { text: prompt },
-                    { inline_data: { mime_type: file.type || 'image/jpeg', data: cleanBase64 } }
-                  ]
-                }],
-                generationConfig: { responseMimeType: "application/json" }
-              })
-            });
+            let parsed = null;
+            for (const model of GEMINI_CANDIDATE_MODELS) {
+              try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    contents: [{
+                      parts: [
+                        { text: prompt },
+                        { inline_data: { mime_type: file.type || 'image/jpeg', data: cleanBase64 } }
+                      ]
+                    }],
+                    generationConfig: { responseMimeType: "application/json" }
+                  })
+                });
 
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
-            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            const parsed = JSON.parse(text.trim());
+                if (res.ok) {
+                  const data = await res.json();
+                  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                  if (text) {
+                    parsed = JSON.parse(text.trim());
+                    break;
+                  }
+                }
+              } catch (mErr) {
+                console.warn(`Model ${model} failed for OCR:`, mErr);
+              }
+            }
+
+            if (!parsed) {
+              throw new Error('All models failed');
+            }
 
             setScanType(parsed.type === 'INCOME' ? 'INCOME' : 'EXPENSE');
             setParsedSlip(parsed);
           } catch (err) {
             console.error(err);
-            alert('ไม่สามารถอ่านสลิปได้ กรุณาตรวจสอบรูปภาพ หรือกรอกข้อมูลด้วยตนเอง');
+            alert('ไม่สามารถอ่านสลิปด้วย AI ได้ กรุณาตรวจสอบรูปภาพ หรือกรอกข้อมูลด้วยตนเอง');
             setParsedSlip({
               merchant: 'ไม่ระบุชื่อ',
               amount: 0.0,
@@ -973,9 +1602,10 @@
         setTransactions(prev => [fullTxn, ...prev]);
 
         // Sync to Google Sheets if configured
-        if (settings.googleAppsScriptUrl) {
+        const gasUrl = settings.googleAppsScriptUrl || DEFAULT_GAS_URL;
+        if (gasUrl) {
           try {
-            await fetch(settings.googleAppsScriptUrl, {
+            await fetch(gasUrl, {
               method: 'POST',
               mode: 'no-cors',
               headers: { 'Content-Type': 'application/json' },
@@ -985,13 +1615,27 @@
             console.warn('Sync to Google Sheets failed:', err);
           }
         }
-        confetti({ particleCount: 30, spread: 50, origin: { y: 0.8 } });
+        confetti({ particleCount: 35, spread: 50, origin: { y: 0.8 } });
       };
 
       // Delete Transaction
-      const handleDelete = (id) => {
+      const handleDelete = async (id) => {
         if (confirm('ต้องการลบรายการนี้ใช่หรือไม่?')) {
           setTransactions(prev => prev.filter(t => t.id !== id));
+
+          const gasUrl = settings.googleAppsScriptUrl || DEFAULT_GAS_URL;
+          if (gasUrl) {
+            try {
+              await fetch(gasUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'deleteTransaction', id, user: currentUser.username })
+              });
+            } catch (err) {
+              console.warn('Sync delete to Google Sheets failed:', err);
+            }
+          }
         }
       };
 
@@ -1029,7 +1673,7 @@
                       {currentUser.name}
                     </span>
                   </div>
-                  <p className="text-[10px] text-slate-400 font-medium">บันทึกสินค้า & สลิปอัจฉริยะ</p>
+                  <p className="text-[10px] text-slate-400 font-medium">บันทึกสินค้า & สลิปบัญชี</p>
                 </div>
               </div>
 
@@ -1041,7 +1685,7 @@
 
                 <button
                   onClick={() => setShowSettings(true)}
-                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-sm tap-bounce"
+                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 tap-bounce"
                   title="ตั้งค่า"
                 >
                   ⚙️
@@ -1049,7 +1693,7 @@
 
                 <button
                   onClick={handleLogout}
-                  className="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200 tap-bounce"
+                  className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-600 border border-slate-200 tap-bounce"
                   title="ออกจากระบบ"
                 >
                   🚪 ออก
@@ -1058,7 +1702,7 @@
             </div>
           </header>
 
-          {/* View Mode Switcher (Home vs Stats) */}
+          {/* View Mode Switcher (Home vs Chat vs Stats) */}
           <div className="max-w-2xl w-full mx-auto px-4 pt-3">
             <div className="flex bg-white/70 p-1 rounded-2xl border border-slate-200 gap-1 shadow-xs">
               <button
@@ -1070,7 +1714,18 @@
                 }`}
               >
                 <span>🏠</span>
-                <span>หน้าหลัก & จดบิล</span>
+                <span>หน้าหลัก</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('chat')}
+                className={`flex-1 py-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
+                  activeTab === 'chat'
+                    ? isBoy ? 'bg-sky-500 text-white shadow-sm' : 'bg-pink-500 text-white shadow-sm'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <span>💬</span>
+                <span>หมูอ้วนช่วยจด</span>
               </button>
               <button
                 onClick={() => setActiveTab('stats')}
@@ -1081,7 +1736,7 @@
                 }`}
               >
                 <span>📊</span>
-                <span>สถิติ & ดูกราฟ</span>
+                <span>สถิติ & กราฟ</span>
               </button>
             </div>
           </div>
@@ -1090,6 +1745,17 @@
           <main className="max-w-2xl w-full mx-auto p-4 space-y-4 flex-1">
             {activeTab === 'stats' ? (
               <StatsView transactions={transactions} isBoy={isBoy} cardClass={cardClass} />
+            ) : activeTab === 'chat' ? (
+              <ChatView
+                currentUser={currentUser}
+                isBoy={isBoy}
+                cardClass={cardClass}
+                primaryBtnClass={primaryBtnClass}
+                settings={settings}
+                onSaveTransaction={handleSaveTransaction}
+                onDeleteTransaction={handleDelete}
+                transactions={transactions}
+              />
             ) : (
               <div className="space-y-4 animate-in fade-in">
                 {/* Date Navigator */}
@@ -1114,6 +1780,115 @@
                   >
                     ▶
                   </button>
+                </div>
+
+                {/* Quick AI Chat Input Bar */}
+                <div className={`p-3.5 ${cardClass} border-2 ${isBoy ? 'border-sky-300' : 'border-pink-300'} space-y-2 shadow-sm`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-base">💬</span>
+                      <h3 className="text-xs font-black text-slate-800">หมูอ้วนช่วยจด AI (พิมพ์ปุ๊บ บันทึกปั๊บ)</h3>
+                    </div>
+                    <button
+                      onClick={() => setActiveTab('chat')}
+                      className={`text-[11px] font-bold ${isBoy ? 'text-sky-600' : 'text-pink-600'} hover:underline flex items-center gap-1`}
+                    >
+                      <span>เปิดห้องแชท</span>
+                      <span>💬</span>
+                    </button>
+                  </div>
+
+                  <form
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      if (!homeChatInput.trim() || homeChatLoading) return;
+                      const text = homeChatInput.trim();
+                      setHomeChatInput('');
+                      setHomeChatLoading(true);
+                      try {
+                        const apiKey = settings.geminiApiKey || DEFAULT_GEMINI_KEY;
+                        const parsed = await parseTransactionWithAI(text, apiKey);
+                        if (parsed && parsed.isTransaction && parsed.amount > 0) {
+                          const now = new Date();
+                          const ymd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+                          const newTxn = {
+                            id: `TXN-AI-${Date.now()}`,
+                            user: currentUser.username,
+                            date: ymd,
+                            time: now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+                            type: parsed.type === 'INCOME' ? 'INCOME' : 'EXPENSE',
+                            category: parsed.category || (parsed.type === 'INCOME' ? 'รายรับพิเศษ / อื่นๆ' : 'ค่าใช้จ่ายอื่นๆ'),
+                            amount: Number(parsed.amount),
+                            wallet: parsed.wallet || 'เงินสด',
+                            merchant: parsed.merchant || (parsed.type === 'INCOME' ? 'รายรับ' : 'ค่าใช้จ่าย'),
+                            note: parsed.note ? `[หมูอ้วน AI] ${parsed.note}` : '[หมูอ้วน AI]',
+                            isCategorized: true
+                          };
+                          await handleSaveTransaction(newTxn);
+
+                          // Append to chat history
+                          const historyRaw = localStorage.getItem(`setthi_chat_${currentUser.username}`);
+                          const history = historyRaw ? JSON.parse(historyRaw) : [];
+                          history.push(
+                            { id: `usr-${Date.now()}`, sender: 'user', text, time: now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) },
+                            { id: `ai-${Date.now()}`, sender: 'assistant', text: parsed.replyMessage || `จด ${newTxn.merchant} ฿${newTxn.amount} เรียบร้อยแล้วน้า! 🐷`, savedTxn: newTxn, time: now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) }
+                          );
+                          localStorage.setItem(`setthi_chat_${currentUser.username}`, JSON.stringify(history));
+
+                          setHomeChatToast(`✅ บันทึก "${newTxn.merchant}" ฿${newTxn.amount.toLocaleString()} เรียบร้อยแล้วอู๊ด!`);
+                          setTimeout(() => setHomeChatToast(''), 4500);
+                        } else {
+                          setHomeChatToast(parsed?.replyMessage || 'หมูอ้วนยังไม่เห็นจำนวนเงินเลยอู๊ดๆ 🐷');
+                          setTimeout(() => setHomeChatToast(''), 4500);
+                        }
+                      } catch (err) {
+                        console.error(err);
+                        setHomeChatToast('เกิดข้อผิดพลาดในการช่วยจด');
+                        setTimeout(() => setHomeChatToast(''), 4500);
+                      } finally {
+                        setHomeChatLoading(false);
+                      }
+                    }}
+                    className="flex gap-2"
+                  >
+                    <input
+                      type="text"
+                      value={homeChatInput}
+                      onChange={(e) => setHomeChatInput(e.target.value)}
+                      placeholder="เช่น ข้าวกะเพรา 60, ค่าน้ำมัน 500, เงินเดือน 30000"
+                      className="flex-1 text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-pink-400 font-medium"
+                      disabled={homeChatLoading}
+                    />
+                    <button
+                      type="submit"
+                      disabled={homeChatLoading || !homeChatInput.trim()}
+                      className={`px-4 py-2 ${primaryBtnClass} text-xs font-black shadow-xs shrink-0 flex items-center gap-1 disabled:opacity-50`}
+                    >
+                      {homeChatLoading ? '🐽...' : '🚀 จด'}
+                    </button>
+                  </form>
+
+                  {homeChatToast && (
+                    <div className="p-2 rounded-xl bg-pink-100/90 border border-pink-200 text-slate-800 text-xs font-bold animate-in fade-in flex items-center justify-between">
+                      <span>{homeChatToast}</span>
+                      <button onClick={() => setHomeChatToast('')} className="text-slate-400 hover:text-slate-600 font-bold ml-2">✕</button>
+                    </div>
+                  )}
+
+                  {/* Quick chips */}
+                  <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
+                    {['🍜 ข้าวเที่ยง 60', '☕ กาแฟ 50', '🚗 น้ำมัน 500', '💰 เงินเดือน 35000', '💸 เพื่อนคืน 200'].map(chip => (
+                      <button
+                        key={chip}
+                        type="button"
+                        disabled={homeChatLoading}
+                        onClick={() => setHomeChatInput(chip)}
+                        className="text-[10px] font-bold px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg whitespace-nowrap"
+                      >
+                        {chip}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Mascot Stage & Daily Benchmark Card */}
@@ -1148,185 +1923,74 @@
                       </div>
                     </div>
 
-                    {/* Right: Circular Progress against Daily Benchmark */}
+                    {/* Right: Circular Progress for Daily Benchmark */}
                     <CircularProgress
                       value={dayExpense}
                       max={dailyBenchmark}
-                      size={95}
+                      size={92}
                       strokeWidth={8}
-                      color={dayExpense > dailyBenchmark ? '#f43f5e' : primaryColor}
+                      color={dayExpense > dailyBenchmark ? '#ef4444' : primaryColor}
                       bgColor={primaryBgColor}
                       label="เกณฑ์วัน"
                     />
                   </div>
 
-                  {/* Daily Metrics */}
-                  <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-3 text-center">
-                    <div>
-                      <div className="text-[10px] text-slate-400 font-bold">ใช้ไปวันนี้</div>
-                      <div className="text-sm sm:text-base font-mono font-black text-rose-500">
+                  {/* Benchmark & Spending Sub-metrics */}
+                  <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-slate-100 text-xs">
+                    <div className="bg-slate-50/80 rounded-2xl p-2.5 border border-slate-100 text-center">
+                      <span className="text-[10px] text-slate-400 block font-medium">จ่ายวันนี้ (เกณฑ์ ฿{dailyBenchmark})</span>
+                      <span className={`font-mono font-black text-sm ${dayExpense > dailyBenchmark ? 'text-rose-500' : 'text-slate-700'}`}>
                         ฿{dayExpense.toFixed(2)}
-                      </div>
+                      </span>
                     </div>
-                    <div>
-                      <div className="text-[10px] text-slate-400 font-bold">เกณฑ์กำหนดวัน</div>
-                      <div className="text-sm sm:text-base font-mono font-black text-slate-700">
-                        ฿{dailyBenchmark.toFixed(2)}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-[10px] text-slate-400 font-bold">คงเหลือตามเกณฑ์</div>
-                      <div className={`text-sm sm:text-base font-mono font-black ${remainingDayBudget < 0 ? 'text-red-500' : 'text-emerald-500'}`}>
-                        ฿{remainingDayBudget.toFixed(2)}
-                      </div>
+                    <div className="bg-slate-50/80 rounded-2xl p-2.5 border border-slate-100 text-center">
+                      <span className="text-[10px] text-slate-400 block font-medium">รับวันนี้</span>
+                      <span className="font-mono font-black text-sm text-emerald-600">
+                        +฿{dayIncome.toFixed(2)}
+                      </span>
                     </div>
                   </div>
-
-                  {dayIncome > 0 && (
-                    <div className="mt-2.5 text-center text-xs font-bold text-emerald-600 bg-emerald-50/80 border border-emerald-100 rounded-xl py-1 flex items-center justify-center gap-1">
-                      <span>💰</span>
-                      <span>บันทึกรายรับวันนี้: +฿{dayIncome.toFixed(2)}</span>
-                    </div>
-                  )}
                 </div>
 
-                {/* Quick Action Buttons */}
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => setShowScanner(true)}
-                    className={`py-3 px-4 ${primaryBtnClass} flex items-center justify-center gap-2 tap-bounce text-sm shadow-md`}
-                  >
-                    <span>📷 สแกนสลิป / ใบเสร็จ</span>
-                  </button>
-                  <button
-                    onClick={() => setShowManualAdd(true)}
-                    className="py-3 px-4 btn-candy-yellow flex items-center justify-center gap-2 tap-bounce text-sm shadow-md"
-                  >
-                    <span>➕ จดรายการเอง</span>
-                  </button>
-                </div>
-
-                {/* Item & Transaction List for Selected Date */}
+                {/* Monthly Income & Spending Cap Card */}
                 <div className={`p-4 ${cardClass} space-y-3`}>
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                    <h3 className="text-sm font-black text-slate-700 flex items-center gap-1.5">
-                      <span>🛒 รายการวันนี้</span>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 font-bold text-slate-500">
-                        {dateTxns.length}
-                      </span>
-                    </h3>
-                    <div className="text-right">
-                      <span className="text-xs font-mono font-black text-rose-500 mr-2">
-                        จ่าย ฿{dayExpense.toFixed(2)}
-                      </span>
-                      {dayIncome > 0 && (
-                        <span className="text-xs font-mono font-black text-emerald-600">
-                          รับ +฿{dayIncome.toFixed(2)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {dateTxns.length === 0 ? (
-                    <div className="py-8 text-center text-xs text-slate-400 space-y-1">
-                      <div className="text-2xl">🍃</div>
-                      <p>ยังไม่มีรายการในวันที่เลือก</p>
-                      <p className="text-[10px] text-slate-300">กดปุ่มสแกนสลิปหรือจดรายการด้านบนได้เลยอู๊ด!</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {dateTxns.map(t => {
-                        const meta = getCategoryInfo(t.category, t.type);
-                        const isIncome = t.type === 'INCOME';
-
-                        return (
-                          <div key={t.id} className="p-3 rounded-2xl bg-slate-50/80 border border-slate-100 flex items-center justify-between hover:bg-slate-100/60 transition-colors">
-                            <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg bg-white shadow-xs border border-slate-100">
-                                {meta.icon}
-                              </div>
-                              <div>
-                                <div className="flex items-center gap-1.5">
-                                  <span className="text-xs font-bold text-slate-800">{t.merchant}</span>
-                                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-medium border ${
-                                    isIncome ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-pink-50 text-pink-600 border-pink-100'
-                                  }`}>
-                                    {t.category}
-                                  </span>
-                                </div>
-                                <div className="text-[10px] text-slate-400 font-medium">
-                                  {t.time} • {t.wallet} {t.note ? `• "${t.note}"` : ''}
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-3">
-                              <span className={`font-mono font-black text-sm ${isIncome ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                {isIncome ? '+' : '-'}฿{t.amount.toFixed(2)}
-                              </span>
-                              <button onClick={() => handleDelete(t.id)} className="text-slate-300 hover:text-red-500 font-bold text-xs p-1">
-                                ✕
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {/* Monthly Spending Limit & Actual Income Card */}
-                <div className={`p-4 ${cardClass} space-y-3`}>
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-1.5 font-bold text-slate-700">
-                      <span>🎯 ขีดจำกัดงบ & รายรับเดือนนี้</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 font-mono">
-                        {selectedMonth}
-                      </span>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 block">ภาพรวมประจำเดือน</span>
+                      <h3 className="text-sm font-black text-slate-800">
+                        {new Date(selectedDate).toLocaleDateString('th-TH', { month: 'long', year: 'numeric' })}
+                      </h3>
                     </div>
                     <div className="text-right">
-                      <span className="text-[10px] text-slate-400 block font-medium">รายรับจริงสะสม</span>
-                      <span className="font-mono font-black text-emerald-600 text-xs sm:text-sm">
-                        +฿{monthIncome.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                      <span className="text-[10px] font-bold text-slate-400 block">ขีดจำกัดงบรายจ่าย</span>
+                      <span className="text-xs font-mono font-black text-slate-700">
+                        ใช้ไป ฿{monthExpense.toLocaleString()} / ฿{monthlyLimit.toLocaleString()}
                       </span>
                     </div>
                   </div>
 
-                  {/* Monthly Limit Progress Gauge */}
+                  {/* Monthly Limit Progress Bar */}
                   <div className="space-y-1">
-                    <div className="flex justify-between text-[11px] font-bold text-slate-600">
-                      <span>
-                        จ่ายไป: <span className="font-mono text-rose-500 font-black">฿{monthExpense.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
-                        <span className="text-slate-400 font-normal"> / ขีดจำกัด ฿{monthlyLimit.toLocaleString()}</span>
-                      </span>
-                      <span className={monthExpense > monthlyLimit ? 'text-rose-600 font-black' : 'text-slate-500'}>
-                        {Math.round((monthExpense / (monthlyLimit || 1)) * 100)}%
-                      </span>
-                    </div>
                     <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden p-0.5">
                       <div
-                        className={`h-full rounded-full transition-all duration-500 ${
-                          monthExpense > monthlyLimit
-                            ? 'bg-rose-500'
-                            : isBoy ? 'bg-sky-400' : 'bg-pink-400'
+                        className={`h-full rounded-full transition-all duration-700 ${
+                          monthExpense > monthlyLimit ? 'bg-rose-500' : 'bg-candy-pink'
                         }`}
-                        style={{
-                          width: `${Math.min((monthExpense / (monthlyLimit || 1)) * 100, 100)}%`
-                        }}
+                        style={{ width: `${Math.min((monthExpense / monthlyLimit) * 100, 100)}%` }}
                       />
                     </div>
-                    <div className="flex justify-between text-[10px] text-slate-400 pt-0.5">
+                    <div className="flex justify-between text-[10px] font-bold text-slate-400">
+                      <span>ใช้ไปแล้ว {Math.round((monthExpense / monthlyLimit) * 100)}%</span>
                       <span>
                         {monthlyLimitRemaining >= 0 
-                          ? `เหลืองบใช้ได้อีก ฿${monthlyLimitRemaining.toFixed(2)} ในเดือนนี้`
-                          : `⚠️ เกินขีดจำกัดเดือนนี้ไปแล้ว ฿${Math.abs(monthlyLimitRemaining).toFixed(2)}`
+                          ? `เหลืองบใช้ได้อีก ฿${monthlyLimitRemaining.toLocaleString()}`
+                          : `เกินขีดจำกัดงบ ฿${Math.abs(monthlyLimitRemaining).toLocaleString()}`
                         }
                       </span>
-                      <span>ตั้งขีดจำกัดไว้ไม่เกิน ฿{monthlyLimit.toLocaleString()}</span>
                     </div>
                   </div>
 
-                  {/* Monthly Overview Grid */}
+                  {/* Monthly KPI 3-Column Summary */}
                   <div className="grid grid-cols-3 gap-2 pt-1 border-t border-slate-100 text-[11px] text-center">
                     <div className="bg-slate-50/80 rounded-xl p-2 border border-slate-100">
                       <span className="text-[10px] text-slate-400 block font-medium">รายรับจริง</span>
@@ -1347,6 +2011,91 @@
                       </span>
                     </div>
                   </div>
+                </div>
+
+                {/* Action Buttons: Add / Scan */}
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => setShowScanner(true)}
+                    className={`py-3 ${primaryBtnClass} text-xs sm:text-sm font-black flex items-center justify-center gap-2 tap-bounce`}
+                  >
+                    <span>📸</span>
+                    <span>สแกนสลิป / ใบเสร็จ</span>
+                  </button>
+                  <button
+                    onClick={() => setShowManualAdd(true)}
+                    className="py-3 btn-candy-yellow text-xs sm:text-sm font-black flex items-center justify-center gap-2 tap-bounce text-slate-800"
+                  >
+                    <span>➕</span>
+                    <span>จดรายการเอง</span>
+                  </button>
+                </div>
+
+                {/* Transactions List */}
+                <div className={`p-4 ${cardClass} space-y-3`}>
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <h3 className="text-sm font-black text-slate-800 flex items-center gap-1.5">
+                      <span>🧾 รายการของวันนี้</span>
+                      <span className="text-[11px] font-bold text-slate-400">({dateTxns.length})</span>
+                    </h3>
+                  </div>
+
+                  {dateTxns.length === 0 ? (
+                    <div className="py-8 text-center space-y-2">
+                      <div className="text-3xl opacity-60">🍃</div>
+                      <p className="text-xs text-slate-400 font-bold">ยังไม่มีรายการสำหรับวันนี้</p>
+                      <p className="text-[10px] text-slate-300">แตะสแกนสลิป หรือพิมพ์คุยกับหมูอ้วนได้เลย!</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {dateTxns.map((t) => (
+                        <div
+                          key={t.id}
+                          className="flex items-center justify-between p-3 rounded-2xl bg-slate-50/80 hover:bg-slate-100/80 border border-slate-100 transition-colors group"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center text-xl shadow-xs border border-slate-100">
+                              {getCategoryInfo(t.category, t.type).icon}
+                            </div>
+                            <div>
+                              <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                                <span>{t.merchant || t.category}</span>
+                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                                  t.type === 'INCOME' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+                                }`}>
+                                  {t.type === 'INCOME' ? 'รายรับ' : 'รายจ่าย'}
+                                </span>
+                              </div>
+                              <div className="text-[10px] text-slate-400 flex items-center gap-2">
+                                <span>{t.time || 'ไม่ระบุเวลา'}</span>
+                                <span>•</span>
+                                <span>{t.category}</span>
+                                {t.wallet && (
+                                  <>
+                                    <span>•</span>
+                                    <span>{t.wallet}</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2.5">
+                            <span className={`font-mono font-black text-sm ${t.type === 'INCOME' ? 'text-emerald-600' : 'text-rose-500'}`}>
+                              {t.type === 'INCOME' ? '+' : '-'}฿{t.amount.toFixed(2)}
+                            </span>
+                            <button
+                              onClick={() => handleDelete(t.id)}
+                              className="text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                              title="ลบรายการ"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -1382,7 +2131,7 @@
                           onChange={(e) => handleImageFile(e.target.files[0])}
                         />
                       </label>
-                      <p className="text-[10px] text-slate-400">ใช้ Gemini 2.5 Flash ช่วยอ่านอย่างแม่นยำ</p>
+                      <p className="text-[10px] text-slate-400">ใช้ Gemini AI ช่วยอ่านอย่างแม่นยำ</p>
                     </div>
                   )
                 ) : (
@@ -1422,27 +2171,33 @@
                       <input
                         type="number"
                         step="0.01"
-                        id="scan_amount"
-                        defaultValue={parsedSlip.amount}
+                        id="slip_amount"
+                        defaultValue={parsedSlip.amount || ''}
                         className={`w-full font-mono text-xl font-black bg-slate-50 border-2 rounded-xl px-3 py-2 outline-none ${
                           scanType === 'EXPENSE' ? 'text-rose-500 border-rose-200' : 'text-emerald-500 border-emerald-200'
                         }`}
                       />
                     </div>
+
                     <div>
-                      <label className="text-[11px] font-bold text-slate-500">ชื่อร้านค้า / แหล่งที่มา</label>
+                      <label className="text-[11px] font-bold text-slate-500">
+                        {scanType === 'EXPENSE' ? 'ชื่อร้านค้า / ผู้รับเงิน' : 'แหล่งที่มา / ผู้โอนเงิน'}
+                      </label>
                       <input
                         type="text"
-                        id="scan_merchant"
-                        defaultValue={parsedSlip.merchant}
+                        id="slip_merchant"
+                        defaultValue={parsedSlip.merchant || ''}
                         className="w-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none"
                       />
                     </div>
+
                     <div>
-                      <label className="text-[11px] font-bold text-slate-500">หมวดหมู่</label>
+                      <label className="text-[11px] font-bold text-slate-500">
+                        หมวดหมู่{scanType === 'INCOME' ? 'รายรับ' : 'รายจ่าย'}
+                      </label>
                       <select
-                        id="scan_category"
-                        defaultValue={parsedSlip.suggestedCategory}
+                        id="slip_category"
+                        defaultValue={parsedSlip.suggestedCategory || (scanType === 'INCOME' ? 'รายรับพิเศษ / อื่นๆ' : 'อาหารและเครื่องดื่ม')}
                         className="w-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none"
                       >
                         {(scanType === 'INCOME' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map(c => (
@@ -1450,30 +2205,16 @@
                         ))}
                       </select>
                     </div>
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-500">บันทึกช่วยจำ</label>
-                      <input
-                        type="text"
-                        id="scan_note"
-                        defaultValue={parsedSlip.note}
-                        placeholder="เช่น มื้อเที่ยงกับเพื่อน"
-                        className="w-full text-xs text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none"
-                      />
-                    </div>
 
                     <div className="flex gap-2 pt-2">
-                      <button
-                        onClick={() => { setShowScanner(false); setParsedSlip(null); }}
-                        className="flex-1 py-2.5 rounded-full bg-slate-100 text-slate-600 font-bold text-xs"
-                      >
+                      <button onClick={() => { setShowScanner(false); setParsedSlip(null); }} className="flex-1 py-2.5 rounded-full bg-slate-100 text-slate-600 font-bold text-xs">
                         ยกเลิก
                       </button>
                       <button
                         onClick={() => {
-                          const amt = parseFloat(document.getElementById('scan_amount').value) || 0;
-                          const mer = document.getElementById('scan_merchant').value || 'ไม่ระบุ';
-                          const cat = document.getElementById('scan_category').value;
-                          const not = document.getElementById('scan_note').value;
+                          const amt = parseFloat(document.getElementById('slip_amount').value) || 0;
+                          const mer = document.getElementById('slip_merchant').value || (scanType === 'INCOME' ? 'รายรับ' : 'ไม่ระบุชื่อ');
+                          const cat = document.getElementById('slip_category').value;
 
                           handleSaveTransaction({
                             id: `TXN-${Date.now()}`,
@@ -1482,18 +2223,18 @@
                             type: scanType,
                             category: cat,
                             amount: amt,
-                            wallet: parsedSlip.bank || 'KBank',
+                            wallet: parsedSlip.bank || 'สลิป',
                             merchant: mer,
-                            note: not,
+                            note: parsedSlip.note || 'สแกนจากสลิป/ใบเสร็จ',
                             slipRef: parsedSlip.slipRef || '',
                             isCategorized: true
                           });
                           setShowScanner(false);
                           setParsedSlip(null);
                         }}
-                        className={`flex-2 py-2.5 px-5 ${scanType === 'INCOME' ? 'bg-emerald-500 text-white rounded-full' : primaryBtnClass} text-xs font-black shadow-md`}
+                        className={`flex-1 py-2.5 ${scanType === 'INCOME' ? 'bg-emerald-500 hover:bg-emerald-600 text-white rounded-full' : primaryBtnClass} text-xs font-black shadow-md`}
                       >
-                        {scanType === 'INCOME' ? '💰 บันทึกรายรับเข้ากระปุก' : '💾 บันทึกรายจ่าย'}
+                        {scanType === 'INCOME' ? '💰 บันทึกรายรับ' : '💾 บันทึกรายจ่าย'}
                       </button>
                     </div>
                   </div>
@@ -1641,17 +2382,17 @@
                 </div>
 
                 <div>
-                  <label className="font-bold text-slate-600 block mb-1">Gemini API Key (สำหรับสแกนสลิป)</label>
+                  <label className="font-bold text-slate-600 block mb-1">Gemini API Key (สำหรับ AI ช่วยจด & สแกนสลิป)</label>
                   <input
                     type="password"
                     id="cfg_key"
-                    defaultValue={settings.geminiApiKey}
-                    placeholder="AIzaSy..."
+                    defaultValue={settings.geminiApiKey || DEFAULT_GEMINI_KEY}
+                    placeholder="AQ.Ab8..."
                     className="w-full font-mono bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 outline-none"
                   />
-                  <a href="https://aistudio.google.com/app/apikey" target="_blank" className="text-[10px] text-pink-500 underline mt-0.5 inline-block font-bold">
-                    รับ Gemini API Key ฟรีจาก Google AI Studio
-                  </a>
+                  <p className="text-[10px] text-emerald-600 mt-0.5 font-bold">
+                    ✅ ฝังคีย์มาตรฐานจาก App MooAuan ให้เรียบร้อยแล้ว
+                  </p>
                 </div>
 
                 <div>
@@ -1659,11 +2400,13 @@
                   <input
                     type="url"
                     id="cfg_url"
-                    defaultValue={settings.googleAppsScriptUrl}
+                    defaultValue={settings.googleAppsScriptUrl || DEFAULT_GAS_URL}
                     placeholder="https://script.google.com/macros/s/.../exec"
                     className="w-full font-mono bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 outline-none"
                   />
-                  <p className="text-[10px] text-slate-400 mt-0.5">ใช้ Code.gs ในโฟลเดอร์โปรเจกต์นี้</p>
+                  <p className="text-[10px] text-emerald-600 mt-0.5 font-bold">
+                    ✅ ฝัง URL เชื่อม Google Sheets เรียบร้อยแล้ว
+                  </p>
                 </div>
 
                 <div className="flex gap-2 pt-2">
@@ -1672,8 +2415,8 @@
                   </button>
                   <button
                     onClick={() => {
-                      const k = document.getElementById('cfg_key').value.trim();
-                      const u = document.getElementById('cfg_url').value.trim();
+                      const k = document.getElementById('cfg_key').value.trim() || DEFAULT_GEMINI_KEY;
+                      const u = document.getElementById('cfg_url').value.trim() || DEFAULT_GAS_URL;
                       const db = parseFloat(document.getElementById('cfg_daily_budget').value) || 600;
                       const ml = parseFloat(document.getElementById('cfg_monthly_limit').value) || 20000;
 
