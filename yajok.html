@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>เสี่ยเลี้ยง (Sia Liang) - บันทึกรายรับรายจ่ายสายเปย์</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐷</text></svg>">
+  
+  <!-- Google Fonts: Prompt -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            sia: {
+              dark: '#161319',
+              card: '#221C26',
+              border: '#352C3D',
+              pink: '#FF8DA1',
+              pinkLight: '#FFB4C2',
+              pinkDark: '#E05D75',
+              gold: '#FFD166',
+              goldHover: '#E5B842',
+              green: '#06D6A0',
+              textMuted: '#A096A8',
+              textLight: '#FDFCFE'
+            }
+          },
+          fontFamily: {
+            sans: ['Prompt', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- React 18, ReactDOM & Babel Standalone CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body {
+      background-color: #161319;
+      color: #FDFCFE;
+      font-family: 'Prompt', sans-serif;
+    }
+    @keyframes bounceSlow {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .animate-bounce-slow {
+      animation: bounceSlow 3s ease-in-out infinite;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #161319;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #352C3D;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="selection:bg-amber-400 selection:text-black">
+  <div id="root"></div>
+
+  <!-- React Application Script -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // Default Configuration
+    const DEFAULT_CATEGORIES = [
+      { id: 'cat-1', name: 'อาหารและเครื่องดื่ม', icon: '🍜', color: '#F59E0B', budget: 6000, type: 'EXPENSE' },
+      { id: 'cat-2', name: 'เดินทาง / น้ำมัน', icon: '🚗', color: '#3B82F6', budget: 3000, type: 'EXPENSE' },
+      { id: 'cat-3', name: 'ช้อปปิ้ง & ของขวัญ', icon: '🛍️', color: '#EC4899', budget: 2500, type: 'EXPENSE' },
+      { id: 'cat-4', name: 'บิล & ค่าใช้จ่ายบ้าน', icon: '💡', color: '#8B5CF6', budget: 2000, type: 'EXPENSE' },
+      { id: 'cat-5', name: 'สุขภาพ / สปา / ดูแลตัวเอง', icon: '💊', color: '#10B981', budget: 1000, type: 'EXPENSE' },
+      { id: 'cat-6', name: 'ปาร์ตี้ & ความบันเทิง', icon: '🥂', color: '#6366F1', budget: 1500, type: 'EXPENSE' },
+      { id: 'cat-7', name: 'อื่นๆ', icon: '📦', color: '#64748B', budget: 1000, type: 'EXPENSE' },
+      { id: 'cat-8', name: 'เงินเดือน / กำไรธุรกิจ', icon: '💰', color: '#22C55E', budget: 0, type: 'INCOME' },
+    ];
+
+    const WALLET_OPTIONS = [
+      'KBank (กสิกรไทย)',
+      'SCB (ไทยพาณิชย์)',
+      'Krungthai (กรุงไทย)',
+      'Bangkok Bank (กรุงเทพ)',
+      'TTB (ทีทีบี)',
+      'GSB (ออมสิน)',
+      'TrueMoney Wallet',
+      'บัตรเครดิตสายเปย์',
+      'เงินสดเสี่ย',
+      'อื่นๆ'
+    ];
+
+    const DEFAULT_TRANSACTIONS = [
+      {
+        id: 'TXN-INIT-001',
+        date: new Date().toISOString().split('T')[0],
+        time: '08:30',
+        type: 'EXPENSE',
+        category: 'อาหารและเครื่องดื่ม',
+        amount: 120.00,
+        wallet: 'KBank',
+        merchant: 'Cafe Amazon (คาเฟ่ อเมซอน)',
+        tags: ['#กาแฟเช้า', '#เสี่ยเลี้ยง'],
+        note: 'อเมริกาโน่เย็นหวาน 0%',
+        slipRef: '2026111108300012',
+        isCategorized: true
+      },
+      {
+        id: 'TXN-INIT-002',
+        date: new Date().toISOString().split('T')[0],
+        time: '12:15',
+        type: 'EXPENSE',
+        category: 'อาหารและเครื่องดื่ม',
+        amount: 65.00,
+        wallet: 'TrueMoney',
+        merchant: '7-Eleven สาขาหน้าปากซอย',
+        tags: ['#มื้อเที่ยง'],
+        note: 'ข้าวกะเพราไก่',
+        slipRef: '2026111112150034',
+        isCategorized: true
+      }
+    ];
+
+    const TAROT_CARDS = [
+      {
+        title: 'ไพ่เสี่ยสายเปย์ตัวจริง',
+        subtitle: 'เปย์หมดไม่สนลูกใคร พกความมั่นใจเต็มกระเป๋า',
+        emoji: '😎💸',
+        advice: 'ใจป๋ามากเสี่ย! เปย์ฉ่ำจนทุกคนต้องเรียกป๋า แต่ระวังอย่าเปย์จนลืมเก็บเงินเข้ากระปุกหมูนะอู๊ด!',
+        vibeColor: 'from-amber-500 to-yellow-600',
+      },
+      {
+        title: 'ไพ่เสี่ยชาบู & ปาร์ตี้',
+        subtitle: 'เลี้ยงทุกคนรอบโต๊ะ พุงนำหน้าเงิน',
+        emoji: '🥩🍻',
+        advice: 'บิลค่าอาหารเครื่องดื่มยาวเป็นหางว่าว! เสี่ยเปย์จนหมูอิ่มบุญไปด้วย พักดื่มน้ำเปล่าบ้างนะอู๊ด!',
+        vibeColor: 'from-pink-600 to-rose-700',
+      },
+      {
+        title: 'ไพ่เสี่ยฉลาดใช้ (Smart Tycoon)',
+        subtitle: 'เปย์อย่างมีชั้นเชิง เงินออมงอกเงย',
+        emoji: '👑🐖',
+        advice: 'สุดยอดวิสัยทัศน์เสี่ย! รู้จักหา รู้จักเปย์ และรู้จักเก็บ หมูตัวแน่นเปรี๊ยะไปด้วยเงินออม รวยยั่งยืนแน่นอนอู๊ด!',
+        vibeColor: 'from-emerald-500 to-teal-700',
+      },
+      {
+        title: 'ไพ่เสี่ยเอฟของดึก',
+        subtitle: 'กดสั่งตอนเที่ยงคืน กล่องพัสดุล้นบ้าน',
+        emoji: '📦💳',
+        advice: 'พัสดุมาส่งจนรปภ. จำหน้าได้แล้วเสี่ย! สติมาก่อนกดซื้อนะอู๊ด หมูอ้วนเป็นห่วง!',
+        vibeColor: 'from-purple-600 to-indigo-700',
+      },
+    ];
+
+    // Main App Component
+    function App() {
+      // Load Settings from LocalStorage
+      const [settings, setSettings] = useState(() => {
+        const raw = localStorage.getItem('sialiang_settings');
+        return raw ? JSON.parse(raw) : {
+          geminiApiKey: '',
+          googleAppsScriptUrl: '',
+          monthlyBudget: 25000,
+          streakCount: 1,
+          lastActiveDate: new Date().toISOString().split('T')[0],
+          streakEasyMode: true
+        };
+      });
+
+      // Load Transactions
+      const [transactions, setTransactions] = useState(() => {
+        const raw = localStorage.getItem('sialiang_transactions');
+        return raw ? JSON.parse(raw) : DEFAULT_TRANSACTIONS;
+      });
+
+      // Load Categories
+      const [categories, setCategories] = useState(() => {
+        const raw = localStorage.getItem('sialiang_categories');
+        return raw ? JSON.parse(raw) : DEFAULT_CATEGORIES;
+      });
+
+      // Modals & Scanning State
+      const [showSettings, setShowSettings] = useState(false);
+      const [showTarot, setShowTarot] = useState(false);
+      const [showVerifyModal, setShowVerifyModal] = useState(false);
+      const [isScanning, setIsScanning] = useState(false);
+      const [isSyncing, setIsSyncing] = useState(false);
+      const [parsedSlip, setParsedSlip] = useState(null);
+      const [imagePreview, setImagePreview] = useState(null);
+
+      // Save transactions whenever they change
+      useEffect(() => {
+        localStorage.setItem('sialiang_transactions', JSON.stringify(transactions));
+      }, [transactions]);
+
+      // Save settings whenever they change
+      useEffect(() => {
+        localStorage.setItem('sialiang_settings', JSON.stringify(settings));
+      }, [settings]);
+
+      // Auto sync on load if Google Sheets configured
+      useEffect(() => {
+        if (settings.googleAppsScriptUrl) {
+          syncWithSheets();
+        }
+      }, []);
+
+      const syncWithSheets = async () => {
+        if (!settings.googleAppsScriptUrl) return;
+        setIsSyncing(true);
+        try {
+          const url = `${settings.googleAppsScriptUrl}?action=get_all&t=${Date.now()}`;
+          const res = await fetch(url);
+          const data = await res.json();
+          if (data.success && data.transactions) {
+            const existingIds = new Set(transactions.map(t => t.id));
+            const newTxns = data.transactions.filter(t => !existingIds.has(t.id));
+            if (newTxns.length > 0) {
+              setTransactions(prev => [...prev, ...newTxns]);
+            }
+          }
+        } catch (e) {
+          console.warn('Sync failed:', e);
+        } finally {
+          setIsSyncing(false);
+        }
+      };
+
+      // Gemini Vision API Call
+      const handleImageUpload = async (file) => {
+        if (!file) return;
+        if (!settings.geminiApiKey) {
+          alert('กรุณากรอก Gemini API Key ในหน้าตั้งค่า ⚙️ ก่อนเริ่มต้นสแกนสลิปนะเสี่ย!');
+          setShowSettings(true);
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async () => {
+          const base64Data = reader.result;
+          setImagePreview(base64Data);
+          setIsScanning(true);
+
+          try {
+            const cleanBase64 = base64Data.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, '');
+            const prompt = `
+คุณคือ AI ผู้ช่วยตรวจสอบสลิปโอนเงินธนาคารไทย ใบเสร็จรับเงิน และบิลค่าใช้จ่ายของแอป "เสี่ยเลี้ยง"
+จงวิเคราะห์ภาพที่ได้รับและตอบเป็น JSON Object เท่านั้น:
+{
+  "bank": "ชื่อธนาคารต้นทางหรือผู้ให้บริการ เช่น KBank, SCB, KTB, BBL, TTB, GSB, TrueMoney, บัตรเครดิต, หรือ ใบเสร็จร้านค้า",
+  "merchant": "ชื่อผู้รับเงิน ร้านค้า เช่น 7-Eleven, Grab, ปตท., นายสมชาย ใจดี",
+  "amount": 0.00,
+  "datetime": "YYYY-MM-DD HH:mm",
+  "slipRef": "เลขอ้างอิงสลิป",
+  "suggestedCategory": "เลือก 1 หมวดหมู่: [อาหารและเครื่องดื่ม, เดินทาง / น้ำมัน, ช้อปปิ้ง & ของขวัญ, บิล & ค่าใช้จ่ายบ้าน, สุขภาพ / สปา / ดูแลตัวเอง, ปาร์ตี้ & ความบันเทิง, อื่นๆ]",
+  "type": "EXPENSE",
+  "note": "บันทึกช่วยจำ (ถ้ามี)",
+  "confidence": 0.95
+}`;
+
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${settings.geminiApiKey}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{
+                  parts: [
+                    { text: prompt },
+                    { inline_data: { mime_type: file.type || 'image/jpeg', data: cleanBase64 } }
+                  ]
+                }],
+                generationConfig: { responseMimeType: "application/json" }
+              })
+            });
+
+            if (!res.ok) {
+              const errJson = await res.json().catch(() => ({}));
+              throw new Error(errJson.error?.message || `HTTP ${res.status}`);
+            }
+
+            const resData = await res.json();
+            const text = resData.candidates?.[0]?.content?.parts?.[0]?.text;
+            const parsed = JSON.parse(text.trim());
+
+            setParsedSlip({
+              success: true,
+              bank: parsed.bank || 'สลิปโอนเงิน',
+              merchant: parsed.merchant || 'ไม่ระบุชื่อร้าน',
+              amount: parseFloat(parsed.amount) || 0,
+              datetime: parsed.datetime || new Date().toISOString().replace('T', ' ').substring(0, 16),
+              slipRef: parsed.slipRef || '',
+              suggestedCategory: parsed.suggestedCategory || 'อาหารและเครื่องดื่ม',
+              type: parsed.type || 'EXPENSE',
+              note: parsed.note || '',
+              confidence: parsed.confidence || 0.95
+            });
+            setShowVerifyModal(true);
+          } catch (err) {
+            alert(`Gemini สแกนไม่สำเร็จ: ${err.message}`);
+          } finally {
+            setIsScanning(false);
+          }
+        };
+        reader.readAsDataURL(file);
+      };
+
+      const handleConfirmTransaction = async (txn) => {
+        setTransactions(prev => [txn, ...prev]);
+
+        // Update streak
+        const today = new Date().toISOString().split('T')[0];
+        if (settings.lastActiveDate !== today) {
+          setSettings(prev => ({
+            ...prev,
+            streakCount: prev.streakCount + 1,
+            lastActiveDate: today
+          }));
+        }
+
+        // Background sync to Google Sheets
+        if (settings.googleAppsScriptUrl) {
+          fetch(settings.googleAppsScriptUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'add_transaction', transaction: txn })
+          }).catch(console.warn);
+        }
+      };
+
+      const handleDelete = (id) => {
+        if (!confirm('ต้องการลบรายการนี้ใช่หรือไม่เสี่ย?')) return;
+        setTransactions(prev => prev.filter(t => t.id !== id));
+        if (settings.googleAppsScriptUrl) {
+          fetch(settings.googleAppsScriptUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'delete_transaction', id })
+          }).catch(console.warn);
+        }
+      };
+
+      // Financial Calculation
+      const now = new Date();
+      const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const monthTxns = transactions.filter(t => t.date.startsWith(currentMonthStr));
+      const totalExpense = monthTxns.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
+      const totalIncome = monthTxns.filter(t => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0);
+      const remainingBudget = settings.monthlyBudget - totalExpense;
+      const spentPercent = settings.monthlyBudget > 0 ? (totalExpense / settings.monthlyBudget) * 100 : 0;
+
+      return (
+        <div className="min-h-screen bg-[#161319] text-[#FDFCFE] flex flex-col">
+          {/* Header */}
+          <header className="sticky top-0 z-40 bg-[#161319]/90 backdrop-blur-md border-b border-[#352C3D] px-4 py-3">
+            <div className="max-w-3xl mx-auto flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-[#FFD166] flex items-center justify-center text-2xl shadow-lg shadow-amber-500/20">
+                  🐷
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <h1 className="text-xl font-bold tracking-tight text-white">เสี่ยเลี้ยง <span className="text-[#FFD166] text-sm font-normal">Sia Liang</span></h1>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-[#FFD166] font-semibold">สายเปย์ AI</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">จดรายจ่ายสไตล์เสี่ยเลี้ยงตัวเอง (Offline + Sheets)</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[#FFD166] text-xs font-semibold">
+                  <span>🔥 เปย์ต่อเนื่อง {settings.streakCount} วัน</span>
+                </div>
+                {settings.googleAppsScriptUrl && (
+                  <button 
+                    onClick={syncWithSheets} 
+                    disabled={isSyncing} 
+                    className="p-2 rounded-xl bg-[#221C26] border border-[#352C3D] text-slate-300 hover:text-white"
+                    title="ซิงค์ Google Sheets"
+                  >
+                    🔄
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowTarot(true)}
+                  className="px-3 py-1.5 rounded-xl bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs font-medium hover:bg-purple-500/30"
+                >
+                  🔮 เสี่ยดูดวง
+                </button>
+                <button
+                  onClick={() => setShowSettings(true)}
+                  className="p-2 rounded-xl bg-[#221C26] border border-[#352C3D] text-slate-300 hover:text-[#FFD166]"
+                >
+                  ⚙️
+                </button>
+              </div>
+            </div>
+          </header>
+
+          {/* Main Content */}
+          <main className="flex-1 max-w-3xl w-full mx-auto p-4 sm:p-6 space-y-5">
+            {/* Mascot Chubby Tycoon Piggy Card */}
+            <div className="bg-gradient-to-b from-[#221C26] to-[#161319] border border-[#352C3D] rounded-3xl p-5 shadow-xl relative overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-center gap-5 relative z-10">
+                <div className="relative shrink-0 flex items-center justify-center">
+                  {/* Cute Chubby Piggy SVG */}
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 relative">
+                    <svg viewBox="0 0 120 120" className="w-full h-full drop-shadow-xl animate-bounce-slow" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      {/* Ears */}
+                      <polygon points="30,42 12,18 48,28" fill="#FF8DA1" stroke="#352C3D" strokeWidth="3" />
+                      <polygon points="30,38 18,22 42,28" fill="#FFB4C2" />
+                      <polygon points="90,42 108,18 72,28" fill="#FF8DA1" stroke="#352C3D" strokeWidth="3" />
+                      <polygon points="90,38 102,22 78,28" fill="#FFB4C2" />
+                      
+                      {/* Piggy Head / Round Body */}
+                      <circle cx="60" cy="62" r="44" fill="#FF8DA1" stroke="#352C3D" strokeWidth="3" />
+                      
+                      {/* Cheeks */}
+                      <circle cx="32" cy="70" r="7" fill="#FF5E7E" opacity="0.6" />
+                      <circle cx="88" cy="70" r="7" fill="#FF5E7E" opacity="0.6" />
+                      
+                      {/* Sunglasses for Sia Piggy! */}
+                      <rect x="30" y="48" width="26" height="15" rx="5" fill="#1E1E24" stroke="#FFD166" strokeWidth="2" />
+                      <rect x="64" y="48" width="26" height="15" rx="5" fill="#1E1E24" stroke="#FFD166" strokeWidth="2" />
+                      <line x1="56" y1="54" x2="64" y2="54" stroke="#FFD166" strokeWidth="2.5" />
+                      {/* Sunglasses reflection highlight */}
+                      <line x1="33" y1="51" x2="40" y2="60" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" opacity="0.7" />
+                      <line x1="67" y1="51" x2="74" y2="60" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" opacity="0.7" />
+                      
+                      {/* Big Cute Piggy Snout */}
+                      <ellipse cx="60" cy="73" rx="19" ry="13" fill="#FFB4C2" stroke="#352C3D" strokeWidth="2.5" />
+                      <ellipse cx="53" cy="73" rx="3.5" ry="5.5" fill="#FF5E7E" />
+                      <ellipse cx="67" cy="73" rx="3.5" ry="5.5" fill="#FF5E7E" />
+                      
+                      {/* Gold Coin on top */}
+                      <rect x="46" y="20" width="28" height="6" rx="3" fill="#352C3D" />
+                      <circle cx="60" cy="16" r="9" fill="#FFD166" stroke="#352C3D" strokeWidth="2" />
+                      <text x="56" y="20" fontSize="11" fontWeight="bold" fill="#352C3D">฿</text>
+                    </svg>
+                  </div>
+
+                  {/* Interactive Gold Coin Button */}
+                  <button
+                    onClick={() => {
+                      setParsedSlip({
+                        success: true,
+                        bank: 'เงินสด',
+                        merchant: '',
+                        amount: 0,
+                        datetime: new Date().toISOString().replace('T', ' ').substring(0, 16),
+                        suggestedCategory: 'อาหารและเครื่องดื่ม',
+                        type: 'EXPENSE',
+                        note: 'เสี่ยเปย์เอง'
+                      });
+                      setImagePreview(null);
+                      setShowVerifyModal(true);
+                    }}
+                    title="กดเพื่อหยอดเหรียญ/จดรายการใหม่"
+                    className="absolute -bottom-1 -right-1 bg-amber-500 p-2 rounded-2xl border border-[#352C3D] text-xl hover:scale-110 active:scale-95 transition-transform shadow-lg text-black font-bold"
+                  >
+                    🪙
+                  </button>
+                </div>
+
+                <div className="flex-1 bg-[#161319]/80 border border-[#352C3D] rounded-2xl p-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-semibold text-[#FFD166] uppercase tracking-wider">น้องหมูเสี่ยเลี้ยง</span>
+                  </div>
+                  <p className="text-sm sm:text-base text-slate-200 leading-relaxed">
+                    {spentPercent >= 100 
+                      ? `"เสี่ยครับ! งบเดือนนี้ทะลุ 100% แล้วนะอู๊ด! เสี่ยเปย์โหดเหมือนโกรธใครมา พักก่อนนะเสี่ย!"`
+                      : spentPercent >= 80 
+                      ? `"เปย์ไป ${Math.round(spentPercent)}% แล้วนะเสี่ย เพลาๆ มือหน่อย หมูใจคอไม่ดีเลยอู๊ด..."`
+                      : `"สวัสดีเสี่ย! วันนี้เสี่ยเปย์อะไรไปบ้าง โยนสลิปมาให้หมูช่วยบันทึกเลยอู๊ด!"`
+                    }
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Slip Uploader */}
+            <div className="bg-[#221C26] border border-[#352C3D] rounded-3xl p-5 shadow-lg">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-2.5 w-2.5 rounded-full bg-[#FFD166] animate-ping" />
+                  <h2 className="text-sm font-semibold text-white">สแกนสลิป & ใบเสร็จสายเปย์ (Gemini AI Vision)</h2>
+                </div>
+                <span className="text-[11px] text-[#FFD166] bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-full font-medium">
+                  20 ธนาคาร + สลิปทุกชนิด
+                </span>
+              </div>
+
+              {isScanning ? (
+                <div className="py-8 text-center space-y-2">
+                  <div className="text-4xl animate-bounce">🕶️🐷</div>
+                  <h3 className="text-sm font-bold text-white">หมูเสี่ยเลี้ยงกำลังเพ่งสลิปให้เสี่ย...</h3>
+                  <p className="text-xs text-slate-400">สกัดยอดเงิน ชื่อร้าน และจัดหมวดหมู่อัตโนมัติ</p>
+                </div>
+              ) : (
+                <div className="border-2 border-dashed border-[#352C3D] hover:border-[#FFD166] rounded-2xl p-6 text-center transition-all bg-[#161319]/40">
+                  <div className="text-3xl mb-2">🧾</div>
+                  <p className="text-xs sm:text-sm text-slate-300 font-medium mb-3">
+                    เลือกรูปสลิปโอนเงิน หรือใบเสร็จที่เสี่ยเปย์ไป
+                  </p>
+                  <label className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#FFD166] hover:from-amber-600 hover:to-amber-400 active:scale-95 text-black font-bold text-xs sm:text-sm shadow-md cursor-pointer transition-all">
+                    <span>📁 เลือกรูปสลิปของเสี่ย</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0])}
+                    />
+                  </label>
+                </div>
+              )}
+            </div>
+
+            {/* Dashboard & Budget */}
+            <div className="bg-[#221C26] border border-[#352C3D] rounded-3xl p-5 shadow-xl space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">สรุปพอร์ตรายจ่ายเดือนนี้</span>
+                <span className="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-300">
+                  {now.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' })}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3.5 rounded-2xl bg-[#161319]/70 border border-rose-500/20">
+                  <div className="text-xs text-rose-400 mb-1">เสี่ยเปย์ไปทั้งหมด</div>
+                  <div className="text-xl sm:text-2xl font-bold text-rose-400">
+                    ฿{totalExpense.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  </div>
+                </div>
+                <div className={`p-3.5 rounded-2xl bg-[#161319]/70 border ${remainingBudget < 0 ? 'border-red-500/40 bg-red-500/5' : 'border-emerald-500/20'}`}>
+                  <div className="text-xs text-emerald-400 mb-1">งบที่เสี่ยยังเปย์ได้</div>
+                  <div className={`text-xl sm:text-2xl font-bold ${remainingBudget < 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                    ฿{remainingBudget.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs mb-1.5">
+                  <span className="text-slate-300">อัตราการใช้งบของเสี่ย</span>
+                  <span className={`font-bold ${spentPercent > 100 ? 'text-red-400' : 'text-[#FFD166]'}`}>
+                    {spentPercent.toFixed(1)}%
+                  </span>
+                </div>
+                <div className="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full rounded-full transition-all duration-500 ${spentPercent > 100 ? 'bg-red-500' : 'bg-gradient-to-r from-emerald-500 via-[#FFD166] to-[#FF8DA1]'}`}
+                    style={{ width: `${Math.min(spentPercent, 100)}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Transactions List */}
+            <div className="bg-[#221C26] border border-[#352C3D] rounded-3xl p-5 shadow-lg space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-white">บันทึกรายการเปย์ ({transactions.length})</h3>
+                <button
+                  onClick={() => {
+                    setParsedSlip({
+                      success: true,
+                      bank: 'เงินสด',
+                      merchant: '',
+                      amount: 0,
+                      datetime: new Date().toISOString().replace('T', ' ').substring(0, 16),
+                      suggestedCategory: 'อาหารและเครื่องดื่ม',
+                      type: 'EXPENSE',
+                      note: ''
+                    });
+                    setImagePreview(null);
+                    setShowVerifyModal(true);
+                  }}
+                  className="text-xs text-[#FFD166] hover:underline"
+                >
+                  + เสี่ยจดเงินสดเอง
+                </button>
+              </div>
+
+              {transactions.length === 0 ? (
+                <div className="py-8 text-center text-xs text-slate-500">
+                  กระเป๋าเสี่ยยังนิ่งอยู่ อัปโหลดสลิปใบแรกให้หมูเสี่ยเลี้ยงกันเถอะอู๊ด!
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {transactions.map(t => (
+                    <div key={t.id} className="p-3 rounded-2xl bg-[#161319]/60 border border-[#352C3D] flex items-center justify-between">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-white">{t.merchant}</span>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">{t.category}</span>
+                        </div>
+                        <div className="text-[11px] text-slate-500 mt-0.5">
+                          {t.date} {t.time} • {t.wallet} {t.note ? `• "${t.note}"` : ''}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className={`font-bold font-mono text-sm ${t.type === 'EXPENSE' ? 'text-rose-400' : 'text-emerald-400'}`}>
+                          {t.type === 'EXPENSE' ? '-' : '+'}฿{t.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        </span>
+                        <button onClick={() => handleDelete(t.id)} className="text-slate-500 hover:text-red-400 text-xs">
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </main>
+
+          {/* Footer */}
+          <footer className="border-t border-[#352C3D] py-6 text-center text-xs text-slate-500">
+            เสี่ยเลี้ยง (Sia Liang) Standalone HTML • เปิดตรงจากเครื่องได้ทันที ไม่ต้องรันเซิร์ฟเวอร์
+          </footer>
+
+          {/* Verify / Add Modal */}
+          {showVerifyModal && parsedSlip && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+              <div className="bg-[#221C26] border border-[#352C3D] rounded-3xl max-w-md w-full p-6 shadow-2xl relative space-y-4">
+                <button onClick={() => setShowVerifyModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white">✕</button>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🪙</span>
+                  <h3 className="text-base font-bold text-white">ตรวจสอบบิลของเสี่ย</h3>
+                </div>
+
+                {imagePreview && (
+                  <div className="rounded-xl overflow-hidden max-h-32 bg-black/40 border border-[#352C3D] flex items-center justify-center">
+                    <img src={imagePreview} className="max-h-32 object-contain" />
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs text-slate-400">ยอดเงินที่เสี่ยเปย์ (บาท)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      defaultValue={parsedSlip.amount || 0}
+                      id="input_amount"
+                      className="w-full bg-[#161319] border-2 border-[#FFD166] rounded-xl px-3 py-2 text-xl font-bold text-[#FFD166] outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-400">ชื่อร้านค้า / ผู้รับเงิน</label>
+                    <input
+                      type="text"
+                      defaultValue={parsedSlip.merchant || ''}
+                      id="input_merchant"
+                      className="w-full bg-[#161319] border border-[#352C3D] rounded-xl px-3 py-2 text-xs text-white outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-400">หมวดหมู่</label>
+                    <select
+                      id="input_category"
+                      defaultValue={parsedSlip.suggestedCategory || categories[0].name}
+                      className="w-full bg-[#161319] border border-[#352C3D] rounded-xl px-3 py-2 text-xs text-white outline-none"
+                    >
+                      {categories.map(c => <option key={c.id} value={c.name}>{c.icon} {c.name}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-400">บันทึกช่วยจำ (Note)</label>
+                    <input
+                      type="text"
+                      defaultValue={parsedSlip.note || ''}
+                      id="input_note"
+                      placeholder="เช่น เลี้ยงข้าวน้องๆ"
+                      className="w-full bg-[#161319] border border-[#352C3D] rounded-xl px-3 py-2 text-xs text-white outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <button onClick={() => setShowVerifyModal(false)} className="flex-1 py-2.5 rounded-xl bg-slate-800 text-xs text-slate-300">
+                    ยกเลิก
+                  </button>
+                  <button
+                    onClick={() => {
+                      const amt = parseFloat(document.getElementById('input_amount').value) || 0;
+                      const mer = document.getElementById('input_merchant').value || 'ไม่ระบุ';
+                      const cat = document.getElementById('input_category').value;
+                      const not = document.getElementById('input_note').value;
+
+                      const newTxn = {
+                        id: `TXN-${Date.now()}`,
+                        date: parsedSlip.datetime?.split(' ')[0] || new Date().toISOString().split('T')[0],
+                        time: parsedSlip.datetime?.split(' ')[1] || '12:00',
+                        type: parsedSlip.type || 'EXPENSE',
+                        category: cat,
+                        amount: amt,
+                        wallet: parsedSlip.bank || 'KBank',
+                        merchant: mer,
+                        tags: [],
+                        note: not,
+                        slipRef: parsedSlip.slipRef || '',
+                        isCategorized: true
+                      };
+
+                      confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 }, colors: ['#FFD166', '#FF8DA1', '#06D6A0'] });
+                      handleConfirmTransaction(newTxn);
+                      setShowVerifyModal(false);
+                    }}
+                    className="flex-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-[#FFD166] hover:from-amber-600 hover:to-amber-400 text-black font-bold text-xs shadow-lg"
+                  >
+                    🪙 เสี่ยเปย์ (บันทึกรายการ)
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Settings Modal */}
+          {showSettings && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+              <div className="bg-[#221C26] border border-[#352C3D] rounded-3xl max-w-md w-full p-6 shadow-2xl relative space-y-4">
+                <button onClick={() => setShowSettings(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white">✕</button>
+                <h3 className="text-base font-bold text-white flex items-center gap-2">⚙️ ตั้งค่าระบบเสี่ยเลี้ยง</h3>
+                
+                <div className="space-y-3 text-xs">
+                  <div>
+                    <label className="text-slate-300 block mb-1">Gemini API Key (สำหรับสแกนสลิป)</label>
+                    <input
+                      type="password"
+                      defaultValue={settings.geminiApiKey}
+                      id="set_gemini_key"
+                      placeholder="AIzaSy..."
+                      className="w-full bg-[#161319] border border-[#352C3D] rounded-xl px-3 py-2 text-white font-mono outline-none"
+                    />
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" className="text-[11px] text-[#FFD166] underline mt-0.5 inline-block">
+                      รับ Gemini API Key ฟรีจาก Google AI Studio
+                    </a>
+                  </div>
+
+                  <div>
+                    <label className="text-slate-300 block mb-1">Google Apps Script Web App URL (ฐานข้อมูลออนไลน์)</label>
+                    <input
+                      type="url"
+                      defaultValue={settings.googleAppsScriptUrl}
+                      id="set_script_url"
+                      placeholder="https://script.google.com/macros/s/.../exec"
+                      className="w-full bg-[#161319] border border-[#352C3D] rounded-xl px-3 py-2 text-white font-mono outline-none"
+                    />
+                    <p className="text-[10px] text-slate-500 mt-0.5">
+                      ดูโค้ดและวิธีติดตั้งในไฟล์ Code.gs ในโฟลเดอร์โปรเจกต์
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="text-slate-300 block mb-1">งบประมาณรายจ่ายต่อเดือนของเสี่ย (บาท)</label>
+                    <input
+                      type="number"
+                      defaultValue={settings.monthlyBudget}
+                      id="set_budget"
+                      className="w-full bg-[#161319] border border-[#352C3D] rounded-xl px-3 py-2 text-white outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <button onClick={() => setShowSettings(false)} className="flex-1 py-2 rounded-xl bg-slate-800 text-xs text-slate-300">
+                    ปิด
+                  </button>
+                  <button
+                    onClick={() => {
+                      const key = document.getElementById('set_gemini_key').value.trim();
+                      const url = document.getElementById('set_script_url').value.trim();
+                      const bgt = parseFloat(document.getElementById('set_budget').value) || 25000;
+
+                      setSettings(prev => ({
+                        ...prev,
+                        geminiApiKey: key,
+                        googleAppsScriptUrl: url,
+                        monthlyBudget: bgt
+                      }));
+                      setShowSettings(false);
+                      alert('บันทึกการตั้งค่าเรียบร้อยแล้วเสี่ย!');
+                    }}
+                    className="flex-1 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-[#FFD166] hover:from-amber-600 hover:to-amber-400 text-black font-bold text-xs"
+                  >
+                    บันทึก
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tarot Modal */}
+          {showTarot && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+              <div className="bg-[#221C26] border border-[#352C3D] rounded-3xl max-w-sm w-full p-6 shadow-2xl relative text-center space-y-4">
+                <button onClick={() => setShowTarot(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white">✕</button>
+                <div className="text-4xl">🔮</div>
+                <h3 className="text-lg font-bold text-white">เสี่ยดูดวงการเงิน</h3>
+                
+                {(() => {
+                  const card = TAROT_CARDS[Math.floor(Math.random() * TAROT_CARDS.length)];
+                  return (
+                    <div className={`p-5 rounded-2xl bg-gradient-to-b ${card.vibeColor} text-white space-y-2`}>
+                      <div className="text-4xl">{card.emoji}</div>
+                      <h4 className="text-base font-black">{card.title}</h4>
+                      <p className="text-xs text-white/80 italic">"{card.subtitle}"</p>
+                      <p className="text-xs bg-black/30 p-2.5 rounded-xl">{card.advice}</p>
+                    </div>
+                  );
+                })()}
+
+                <button onClick={() => setShowTarot(false)} className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs">
+                  เข้าใจแล้วอู๊ด!
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

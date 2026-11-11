@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>เศรษฐีหมูอ้วน (Setthi MooAuan) - จดรายรับรายจ่าย & สแกนสลิปอัจฉริยะ</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐷</text></svg>">
+  
+  <!-- Google Fonts: Fredoka, Prompt, Nunito, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@600;700;800;900&family=Prompt:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Fredoka', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- React 18, ReactDOM & Babel Standalone CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+
+  <!-- MooAuan Kawaii Design System Styles from DESIGN.md -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Prompt', 'Fredoka', 'Nunito', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      user-select: none;
+      letter-spacing: -0.01em;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* 🌸 Theme 1: Strawberry Mochi (Manow) */
+    body.theme-manow {
+      background-color: #fff5f8;
+      background-image: 
+        radial-gradient(#fecdd3 1.2px, transparent 1.2px),
+        radial-gradient(#fbcfe8 1.2px, #fff5f8 1.2px);
+      background-size: 32px 32px;
+      background-position: 0 0, 16px 16px;
+      color: #4a152e;
+    }
+
+    /* 🏋️‍♂️ Theme 2: Soda Pop Arcade (Maxnum) */
+    body.theme-maxnum {
+      background-color: #f0f8ff;
+      background-image: 
+        radial-gradient(#bae6fd 1.2px, transparent 1.2px),
+        radial-gradient(#e0f2fe 1.2px, #f0f8ff 1.2px);
+      background-size: 32px 32px;
+      background-position: 0 0, 16px 16px;
+      color: #0f172a;
+    }
+
+    /* Tactile 3D Buttons */
+    .btn-candy-pink {
+      background-color: #ff6584;
+      border-bottom: 4px solid #d93d62;
+      border-radius: 9999px;
+      color: #ffffff;
+      font-weight: 800;
+      transition: all 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 4px 12px rgba(255, 101, 132, 0.3);
+    }
+    .btn-candy-pink:hover {
+      background-color: #ff7593;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(255, 101, 132, 0.4);
+    }
+    .btn-candy-pink:active {
+      transform: translateY(3px);
+      border-bottom-width: 1px;
+      box-shadow: 0 1px 4px rgba(255, 101, 132, 0.2);
+    }
+
+    .btn-candy-blue {
+      background-color: #38bdf8;
+      border-bottom: 4px solid #0284c7;
+      border-radius: 9999px;
+      color: #ffffff;
+      font-weight: 800;
+      transition: all 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.35);
+    }
+    .btn-candy-blue:hover {
+      background-color: #60a5fa;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(56, 189, 248, 0.45);
+    }
+    .btn-candy-blue:active {
+      transform: translateY(3px);
+      border-bottom-width: 1px;
+      box-shadow: 0 1px 4px rgba(56, 189, 248, 0.2);
+    }
+
+    .btn-candy-yellow {
+      background-color: #fbbf24;
+      border-bottom: 4px solid #d97706;
+      border-radius: 9999px;
+      color: #78350f;
+      font-weight: 800;
+      transition: all 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 4px 12px rgba(251, 191, 36, 0.35);
+    }
+    .btn-candy-yellow:active {
+      transform: translateY(3px);
+      border-bottom-width: 1px;
+    }
+
+    /* Kawaii 3D Cards */
+    .card-kawaii-pink {
+      background: #ffffff;
+      border: 2.5px solid #fed7e2;
+      border-radius: 28px;
+      box-shadow: 0 6px 0 #fecdd3, 0 10px 24px -4px rgba(244, 114, 182, 0.15);
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .card-kawaii-pink:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 #fecdd3, 0 14px 26px -4px rgba(244, 114, 182, 0.2);
+    }
+
+    .card-kawaii-blue {
+      background: #ffffff;
+      border: 2.5px solid #bae6fd;
+      border-radius: 28px;
+      box-shadow: 0 6px 0 #bae6fd, 0 10px 24px -4px rgba(56, 189, 248, 0.15);
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .card-kawaii-blue:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 #bae6fd, 0 14px 26px -4px rgba(56, 189, 248, 0.2);
+    }
+
+    @keyframes cute-bounce-gentle {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-7px) rotate(1.5deg); }
+    }
+    .animate-bounce-gentle {
+      animation: cute-bounce-gentle 2.4s ease-in-out infinite;
+    }
+
+    .tap-bounce {
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .tap-bounce:active {
+      transform: scale(0.95);
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #fbcfe8;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="theme-manow">
+  <div id="root"></div>
+
+  <!-- React Application Script -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const DEFAULT_CATEGORIES = [
+      { id: 'cat-1', name: 'อาหารและเครื่องดื่ม', icon: '🍜', color: '#ff6584', budget: 6000, type: 'EXPENSE' },
+      { id: 'cat-2', name: 'ของใช้ & ช้อปปิ้ง', icon: '🛍️', color: '#ec4899', budget: 3000, type: 'EXPENSE' },
+      { id: 'cat-3', name: 'เดินทาง / น้ำมัน', icon: '🚗', color: '#38bdf8', budget: 2500, type: 'EXPENSE' },
+      { id: 'cat-4', name: 'บิล & ค่าน้ำค่าไฟ', icon: '💡', color: '#a855f7', budget: 2000, type: 'EXPENSE' },
+      { id: 'cat-5', name: 'สุขภาพ / ยา / คลินิก', icon: '💊', color: '#10b981', budget: 1000, type: 'EXPENSE' },
+      { id: 'cat-6', name: 'บันเทิง & สังสรรค์', icon: '🎮', color: '#6366f1', budget: 1500, type: 'EXPENSE' },
+      { id: 'cat-7', name: 'อื่นๆ', icon: '📦', color: '#64748b', budget: 1000, type: 'EXPENSE' },
+      { id: 'cat-8', name: 'เงินเดือน & รายรับ', icon: '💰', color: '#22c55e', budget: 0, type: 'INCOME' },
+    ];
+
+    const DEFAULT_TRANSACTIONS = [
+      {
+        id: 'TXN-000',
+        date: new Date().toISOString().split('T')[0],
+        time: '08:00',
+        type: 'INCOME',
+        category: 'เงินเดือน & รายรับ',
+        amount: 25000.00,
+        wallet: 'KBank',
+        merchant: 'เงินเดือน / รายได้',
+        note: 'เงินเดือนโอนเข้า',
+        slipRef: '202611110800000',
+        isCategorized: true
+      },
+      {
+        id: 'TXN-001',
+        date: new Date().toISOString().split('T')[0],
+        time: '08:30',
+        type: 'EXPENSE',
+        category: 'อาหารและเครื่องดื่ม',
+        amount: 85.00,
+        wallet: 'KBank',
+        merchant: 'Cafe Amazon',
+        note: 'ชาเขียวนมสดหวานน้อย',
+        slipRef: '202611110830001',
+        isCategorized: true
+      },
+      {
+        id: 'TXN-002',
+        date: new Date().toISOString().split('T')[0],
+        time: '12:20',
+        type: 'EXPENSE',
+        category: 'อาหารและเครื่องดื่ม',
+        amount: 65.00,
+        wallet: 'TrueMoney',
+        merchant: '7-Eleven',
+        note: 'ข้าวกะเพราหมูสับไข่ดาว',
+        slipRef: '202611111220002',
+        isCategorized: true
+      }
+    ];
+
+    // Helper: Generate daily level 1-10 based on date hash + seed
+    function getLevelForDate(dateStr, seed = 0) {
+      let hash = seed;
+      for (let i = 0; i < dateStr.length; i++) {
+        hash = ((hash << 5) - hash) + dateStr.charCodeAt(i);
+        hash |= 0;
+      }
+      return (Math.abs(hash) % 10) + 1; // 1 to 10
+    }
+
+    // ========================================================
+    // COMPONENT: HIGH-FIDELITY PNG PIGGY MASCOT (Level 1 - 10)
+    // ========================================================
+    function PigMascot({ level = 1, isBoy = false, size = 'lg', onClick, onReroll }) {
+      const [imgFailed, setImgFailed] = useState(false);
+
+      const sizeClasses = {
+        sm: 'w-10 h-10',
+        md: 'w-20 h-20',
+        lg: 'w-28 h-28 sm:w-32 sm:h-32',
+        xl: 'w-44 h-44'
+      };
+
+      const folderPrefix = isBoy ? 'maxnum' : 'manow';
+      const pngSrc = `./mascots/${folderPrefix}_lv${level}.png`;
+
+      return (
+        <div 
+          onClick={onClick}
+          className={`relative inline-flex items-center justify-center select-none ${sizeClasses[size]} animate-bounce-gentle cursor-pointer group`}
+          title={`เศรษฐีหมูอ้วนร่าง เลเวล ${level} (แตะเพื่อสุ่มเปลี่ยนร่าง)`}
+        >
+          {!imgFailed ? (
+            <img
+              src={pngSrc}
+              alt={`เศรษฐีหมูอ้วน Lv.${level}`}
+              className="w-full h-full object-contain filter drop-shadow-md group-hover:scale-105 transition-transform"
+              onError={() => setImgFailed(true)}
+            />
+          ) : (
+            // Fallback SVG if image not found
+            <svg viewBox="0 0 100 100" fill="none" className="w-full h-full drop-shadow-lg">
+              <ellipse cx="50" cy="52" rx="38" ry="34" fill={isBoy ? '#7dd3fc' : '#ffb6c1'} stroke={isBoy ? '#0284c7' : '#f06292'} strokeWidth="2.5" />
+              <ellipse cx="50" cy="58" rx="15" ry="10" fill={isBoy ? '#e0f2fe' : '#ffd1dc'} stroke={isBoy ? '#0284c7' : '#f06292'} strokeWidth="2" />
+              <circle cx="45" cy="58" r="2.5" fill={isBoy ? '#0284c7' : '#e91e63'} />
+              <circle cx="55" cy="58" r="2.5" fill={isBoy ? '#0284c7' : '#e91e63'} />
+              <circle cx="36" cy="46" r="4" fill="#374151" />
+              <circle cx="64" cy="46" r="4" fill="#374151" />
+            </svg>
+          )}
+
+          {/* Level Badge Pill */}
+          <span className={`absolute -bottom-1 -right-1 text-[9px] font-black px-1.5 py-0.2 rounded-full shadow border text-white ${
+            isBoy ? 'bg-sky-500 border-sky-200' : 'bg-pink-500 border-pink-200'
+          }`}>
+            Lv.{level}
+          </span>
+        </div>
+      );
+    }
+
+    // ========================================================
+    // COMPONENT: CIRCULAR PROGRESS
+    // ========================================================
+    function CircularProgress({ value, max, size = 110, strokeWidth = 9, color = '#ff6584', bgColor = '#fed7e2', label = 'เกณฑ์วัน' }) {
+      const radius = (size - strokeWidth) / 2;
+      const circumference = 2 * Math.PI * radius;
+      const safePercent = Math.min(Math.max(value / (max || 1), 0), 1);
+      const offset = circumference - safePercent * circumference;
+
+      return (
+        <div className="relative inline-flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
+          <svg width={size} height={size} className="transform -rotate-90">
+            <circle cx={size / 2} cy={size / 2} r={radius} stroke={bgColor} strokeWidth={strokeWidth} fill="transparent" />
+            <circle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              stroke={color}
+              strokeWidth={strokeWidth}
+              fill="transparent"
+              strokeDasharray={circumference}
+              strokeDashoffset={offset}
+              strokeLinecap="round"
+              className="transition-all duration-700 ease-out"
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+            <span className="text-sm font-mono font-black">{Math.round((value / (max || 1)) * 100)}%</span>
+            <span className="text-[9px] text-slate-500 font-bold">{label}</span>
+          </div>
+        </div>
+      );
+    }
+
+    // ========================================================
+    // MAIN APP
+    // ========================================================
+    function App() {
+      // Theme State: 'manow' (Strawberry Pink) | 'maxnum' (Soda Pop Blue)
+      const [theme, setTheme] = useState(() => localStorage.getItem('moouan_theme') || 'manow');
+      const isBoy = theme === 'maxnum';
+
+      useEffect(() => {
+        document.body.className = isBoy ? 'theme-maxnum' : 'theme-manow';
+        localStorage.setItem('moouan_theme', theme);
+      }, [theme]);
+
+      // Settings
+      const [settings, setSettings] = useState(() => {
+        const raw = localStorage.getItem('moouan_settings');
+        return raw ? JSON.parse(raw) : {
+          geminiApiKey: '',
+          googleAppsScriptUrl: '',
+          dailyBudget: 600,
+          monthlyBudget: 18000,
+          streakCount: 3,
+          lastActiveDate: new Date().toISOString().split('T')[0]
+        };
+      });
+
+      // Transactions
+      const [transactions, setTransactions] = useState(() => {
+        const raw = localStorage.getItem('moouan_transactions');
+        return raw ? JSON.parse(raw) : DEFAULT_TRANSACTIONS;
+      });
+
+      const [categories] = useState(DEFAULT_CATEGORIES);
+
+      // Selected Date
+      const today = new Date().toISOString().split('T')[0];
+      const [selectedDate, setSelectedDate] = useState(today);
+
+      // Seed for random mascot reroll
+      const [mascotRerollSeed, setMascotRerollSeed] = useState(0);
+
+      // Current level for the selected date
+      const mascotLevel = getLevelForDate(selectedDate, mascotRerollSeed);
+
+      // Modals
+      const [showSettings, setShowSettings] = useState(false);
+      const [showScanner, setShowScanner] = useState(false);
+      const [showManualAdd, setShowManualAdd] = useState(false);
+      const [manualType, setManualType] = useState('EXPENSE');
+      const [scanType, setScanType] = useState('EXPENSE');
+      const [isScanning, setIsScanning] = useState(false);
+      const [parsedSlip, setParsedSlip] = useState(null);
+      const [imagePreview, setImagePreview] = useState(null);
+
+      useEffect(() => {
+        localStorage.setItem('moouan_transactions', JSON.stringify(transactions));
+      }, [transactions]);
+
+      useEffect(() => {
+        localStorage.setItem('moouan_settings', JSON.stringify(settings));
+      }, [settings]);
+
+      // Calculations for Monthly (Budget counted from actual received income)
+      const selectedMonth = selectedDate.substring(0, 7); // e.g. "2026-11"
+      const monthTxns = transactions.filter(t => t.date && t.date.startsWith(selectedMonth));
+      const monthIncome = monthTxns.filter(t => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0);
+      const monthExpense = monthTxns.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
+      const monthBalance = monthIncome - monthExpense;
+
+      // Filter transactions for selected date
+      const dateTxns = transactions.filter(t => t.date === selectedDate);
+      const dayExpense = dateTxns.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
+      const dayIncome = dateTxns.filter(t => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0);
+      const dailyBenchmark = settings.dailyBudget || 600;
+      const remainingDayBudget = dailyBenchmark - dayExpense;
+
+      const cardClass = isBoy ? 'card-kawaii-blue' : 'card-kawaii-pink';
+      const primaryBtnClass = isBoy ? 'btn-candy-blue' : 'btn-candy-pink';
+      const primaryColor = isBoy ? '#38bdf8' : '#ff6584';
+      const primaryBgColor = isBoy ? '#bae6fd' : '#fed7e2';
+
+      const shiftDate = (days) => {
+        const current = new Date(selectedDate);
+        current.setDate(current.getDate() + days);
+        setSelectedDate(current.toISOString().split('T')[0]);
+      };
+
+      // Gemini Vision OCR
+      const handleImageFile = async (file) => {
+        if (!file) return;
+        if (!settings.geminiApiKey) {
+          alert('กรุณากรอก Gemini API Key ในหน้าตั้งค่า ⚙️ ก่อนสแกนสลิปนะอู๊ด!');
+          setShowSettings(true);
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async () => {
+          const base64Data = reader.result;
+          setImagePreview(base64Data);
+          setIsScanning(true);
+
+          try {
+            const cleanBase64 = base64Data.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, '');
+            const prompt = `
+คุณคือ AI ผู้ช่วยตรวจสอบสลิปโอนเงินธนาคารไทย และใบเสร็จสินค้าของแอป "เศรษฐีหมูอ้วน"
+จงวิเคราะห์ภาพที่ได้รับและแปลงเป็น JSON Object เท่านั้น:
+{
+  "merchant": "ชื่อร้านค้า หรือชื่อผู้รับเงิน เช่น 7-Eleven, Grab, คาเฟ่, นายสมชาย",
+  "amount": 0.00,
+  "datetime": "YYYY-MM-DD HH:mm",
+  "bank": "ธนาคารหรือวอลเล็ต เช่น KBank, SCB, KTB, BBL, TTB, GSB, TrueMoney",
+  "suggestedCategory": "เลือก 1 หมวดหมู่: [อาหารและเครื่องดื่ม, ของใช้ & ช้อปปิ้ง, เดินทาง / น้ำมัน, บิล & ค่าน้ำค่าไฟ, สุขภาพ / ยา / คลินิก, บันเทิง & สังสรรค์, อื่นๆ]",
+  "note": "บันทึกช่วยจำ (ถ้ามี)",
+  "slipRef": "เลขอ้างอิงสลิป"
+}`;
+
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${settings.geminiApiKey}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{
+                  parts: [
+                    { text: prompt },
+                    { inline_data: { mime_type: file.type || 'image/jpeg', data: cleanBase64 } }
+                  ]
+                }],
+                generationConfig: { responseMimeType: "application/json" }
+              })
+            });
+
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            const parsed = JSON.parse(text.trim());
+
+            setParsedSlip({
+              merchant: parsed.merchant || 'ไม่ระบุชื่อร้าน',
+              amount: parseFloat(parsed.amount) || 0,
+              datetime: parsed.datetime || `${selectedDate} 12:00`,
+              bank: parsed.bank || 'KBank',
+              suggestedCategory: parsed.suggestedCategory || 'อาหารและเครื่องดื่ม',
+              note: parsed.note || '',
+              slipRef: parsed.slipRef || ''
+            });
+          } catch (e) {
+            alert(`สแกนไม่สำเร็จ: ${e.message}`);
+          } finally {
+            setIsScanning(false);
+          }
+        };
+        reader.readAsDataURL(file);
+      };
+
+      const handleSaveTransaction = (txn) => {
+        setTransactions(prev => [txn, ...prev]);
+        confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+
+        if (settings.googleAppsScriptUrl) {
+          fetch(settings.googleAppsScriptUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'add_transaction', transaction: txn })
+          }).catch(console.warn);
+        }
+      };
+
+      const handleDelete = (id) => {
+        if (!confirm('ต้องการลบรายการนี้ใช่หรือไม่?')) return;
+        setTransactions(prev => prev.filter(t => t.id !== id));
+        if (settings.googleAppsScriptUrl) {
+          fetch(settings.googleAppsScriptUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'delete_transaction', id })
+          }).catch(console.warn);
+        }
+      };
+
+      return (
+        <div className="min-h-screen flex flex-col pb-16">
+          {/* Top Bar */}
+          <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b border-pink-100 px-4 py-2.5 shadow-sm">
+            <div className="max-w-2xl mx-auto flex items-center justify-between">
+              {/* Brand & Mascot */}
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl overflow-hidden bg-white shadow-sm border border-pink-100 flex items-center justify-center p-0.5">
+                  <img
+                    src={isBoy ? './mascots/maxnum_icon.png' : './mascots/manow_icon.png'}
+                    alt="Icon"
+                    className="w-full h-full object-contain"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <h1 className="text-lg font-black text-slate-800">เศรษฐีหมูอ้วน</h1>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full text-white ${isBoy ? 'bg-sky-400' : 'bg-pink-400'}`}>
+                      Setthi MooAuan
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-400 font-medium">บันทึกสินค้า & สลิปอัจฉริยะ</p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setTheme(isBoy ? 'manow' : 'maxnum')}
+                  className="px-2.5 py-1 rounded-full text-xs font-bold bg-white border-2 border-pink-100 hover:border-pink-300 transition-all flex items-center gap-1 shadow-sm"
+                  title="สลับธีม 🌸 ชมพูหวาน / 🏋️‍♂️ ฟ้าสปอร์ต"
+                >
+                  <span>{isBoy ? '🏋️‍♂️ ฟ้า' : '🌸 ชมพู'}</span>
+                </button>
+
+                <div className="px-2.5 py-1 rounded-full text-xs font-black bg-amber-100/80 text-amber-700 border border-amber-300 flex items-center gap-1">
+                  <span>🔥 {settings.streakCount} วัน</span>
+                </div>
+
+                <button
+                  onClick={() => setShowSettings(true)}
+                  className="p-1.5 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-slate-800 shadow-sm"
+                >
+                  ⚙️
+                </button>
+              </div>
+            </div>
+          </header>
+
+          {/* Main Layout */}
+          <main className="max-w-2xl w-full mx-auto p-4 space-y-4 flex-1">
+            {/* Date Navigator */}
+            <div className={`p-3 ${cardClass} flex items-center justify-between shadow-sm`}>
+              <button
+                onClick={() => shiftDate(-1)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 tap-bounce"
+              >
+                ◀
+              </button>
+              <div className="text-center cursor-pointer" onClick={() => setSelectedDate(today)}>
+                <div className="text-xs font-bold text-slate-400">
+                  {selectedDate === today ? '✨ วันนี้' : 'ย้อนหลัง'}
+                </div>
+                <div className="text-sm font-black text-slate-700">
+                  {new Date(selectedDate).toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
+                </div>
+              </div>
+              <button
+                onClick={() => shiftDate(1)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 tap-bounce"
+              >
+                ▶
+              </button>
+            </div>
+
+            {/* Mascot Stage & Daily Budget Card */}
+            <div className={`p-5 ${cardClass} relative overflow-hidden`}>
+              <div className="flex items-center justify-between gap-4">
+                {/* Left: High-Fidelity PNG Mascot & Level Switcher */}
+                <div className="flex items-center gap-3">
+                  <PigMascot
+                    level={mascotLevel}
+                    isBoy={isBoy}
+                    size="lg"
+                    onClick={() => {
+                      setMascotRerollSeed(s => s + 1);
+                      confetti({ particleCount: 25, spread: 40 });
+                    }}
+                  />
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full text-white ${isBoy ? 'bg-sky-500' : 'bg-pink-500'}`}>
+                        Mascot Lv.{mascotLevel}
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-bold cursor-pointer hover:underline" onClick={() => setMascotRerollSeed(s => s + 1)}>
+                        🎲 สุ่มร่าง
+                      </span>
+                    </div>
+                    <p className="text-xs sm:text-sm font-bold text-slate-700 leading-snug max-w-[180px] sm:max-w-xs">
+                      {dayExpense > settings.dailyBudget 
+                        ? 'อู๊ดๆ! วันนี้ช้อปเกินงบวันไปแล้วนะพี่มนุษย์ เพลาๆ หน่อย!'
+                        : `วันนี้เศรษฐีหมูอ้วนร่าง Lv.${mascotLevel} คอยเฝ้ากระปุกให้อยู่นะอู๊ด!`
+                      }
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right: Circular Budget Progress */}
+                <CircularProgress
+                  value={dayExpense}
+                  max={dailyBenchmark}
+                  size={95}
+                  strokeWidth={9}
+                  color={dayExpense > dailyBenchmark ? '#f43f5e' : primaryColor}
+                  bgColor={primaryBgColor}
+                  label="เกณฑ์วัน"
+                />
+              </div>
+
+              {/* Budget Metrics Footer */}
+              <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-3 text-center">
+                <div>
+                  <div className="text-[10px] text-slate-400 font-bold">ใช้ไปวันนี้</div>
+                  <div className="text-sm sm:text-base font-mono font-black text-rose-500">
+                    ฿{dayExpense.toFixed(2)}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] text-slate-400 font-bold">เกณฑ์กำหนดวัน</div>
+                  <div className="text-sm sm:text-base font-mono font-black text-slate-700">
+                    ฿{dailyBenchmark.toFixed(2)}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] text-slate-400 font-bold">คงเหลือตามเกณฑ์</div>
+                  <div className={`text-sm sm:text-base font-mono font-black ${remainingDayBudget < 0 ? 'text-red-500' : 'text-emerald-500'}`}>
+                    ฿{remainingDayBudget.toFixed(2)}
+                  </div>
+                </div>
+              </div>
+              {dayIncome > 0 && (
+                <div className="mt-2.5 text-center text-xs font-bold text-emerald-600 bg-emerald-50/80 border border-emerald-100 rounded-xl py-1 flex items-center justify-center gap-1">
+                  <span>💰</span>
+                  <span>บันทึกรายรับวันนี้: +฿{dayIncome.toFixed(2)}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Quick Action Buttons (Tactile 3D) */}
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setShowScanner(true)}
+                className={`py-3 px-4 ${primaryBtnClass} flex items-center justify-center gap-2 tap-bounce text-sm shadow-md`}
+              >
+                <span>📷 สแกนสลิป / ใบเสร็จ</span>
+              </button>
+              <button
+                onClick={() => setShowManualAdd(true)}
+                className="py-3 px-4 btn-candy-yellow flex items-center justify-center gap-2 tap-bounce text-sm shadow-md"
+              >
+                <span>➕ จดรายการเอง</span>
+              </button>
+            </div>
+
+            {/* Item & Transaction List for Selected Date */}
+            <div className={`p-4 ${cardClass} space-y-3`}>
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                <h3 className="text-sm font-black text-slate-700 flex items-center gap-1.5">
+                  <span>🛒 รายการสินค้า & บิลวันนี้</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 font-bold text-slate-500">
+                    {dateTxns.length}
+                  </span>
+                </h3>
+                <span className="text-xs font-mono font-black text-rose-500">
+                  รวม ฿{dayExpense.toFixed(2)}
+                </span>
+              </div>
+
+              {dateTxns.length === 0 ? (
+                <div className="py-8 text-center text-xs text-slate-400 space-y-1">
+                  <div className="text-2xl">🍃</div>
+                  <p>ยังไม่มีรายการสินค้าในวันที่เลือก</p>
+                  <p className="text-[10px] text-slate-300">กดปุ่มสแกนสลิปด้านบนเพื่อบันทึกรายการได้เลยอู๊ด!</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {dateTxns.map(t => {
+                    const cat = categories.find(c => c.name === t.category);
+                    return (
+                      <div key={t.id} className="p-3 rounded-2xl bg-slate-50/80 border border-slate-100 flex items-center justify-between hover:bg-slate-100/60 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg bg-white shadow-sm border border-slate-100">
+                            {cat?.icon || '🛍️'}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs font-bold text-slate-800">{t.merchant}</span>
+                              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-pink-50 text-pink-600 font-medium border border-pink-100">
+                                {t.category}
+                              </span>
+                            </div>
+                            <div className="text-[10px] text-slate-400 font-medium">
+                              {t.time} • {t.wallet} {t.note ? `• "${t.note}"` : ''}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <span className={`font-mono font-black text-sm ${t.type === 'EXPENSE' ? 'text-rose-500' : 'text-emerald-500'}`}>
+                            {t.type === 'EXPENSE' ? '-' : '+'}฿{t.amount.toFixed(2)}
+                          </span>
+                          <button onClick={() => handleDelete(t.id)} className="text-slate-300 hover:text-red-500 font-bold text-xs p-1">
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Monthly Summary based on Actual Income (No fixed monthly budget) */}
+            <div className={`p-4 ${cardClass} space-y-3`}>
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-1.5 font-bold text-slate-700">
+                  <span>📊 สรุปกระเป๋าเงินประจำเดือน</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 font-mono">
+                    {selectedMonth}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-slate-400 block font-medium">รายรับจริงเดือนนี้</span>
+                  <span className="font-mono font-black text-emerald-600 text-xs sm:text-sm">
+                    ฿{monthIncome.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                </div>
+              </div>
+
+              {/* Expense vs Actual Income Gauge */}
+              <div className="space-y-1">
+                <div className="flex justify-between text-[11px] font-bold text-slate-500">
+                  <span>จ่ายสะสม: <span className="font-mono text-rose-500 font-black">฿{monthExpense.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></span>
+                  <span>
+                    {monthIncome > 0
+                      ? `ใช้ไป ${Math.round((monthExpense / monthIncome) * 100)}% ของรายรับ`
+                      : 'ยังไม่มีบันทึกรายรับ'}
+                  </span>
+                </div>
+                <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden p-0.5">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      monthIncome > 0 && monthExpense > monthIncome
+                        ? 'bg-rose-500'
+                        : isBoy ? 'bg-sky-400' : 'bg-pink-400'
+                    }`}
+                    style={{
+                      width: `${monthIncome > 0 ? Math.min((monthExpense / monthIncome) * 100, 100) : 0}%`
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Monthly Stats Grid */}
+              <div className="grid grid-cols-3 gap-2 pt-1 border-t border-slate-100 text-[11px] text-center">
+                <div className="bg-slate-50/80 rounded-xl p-2 border border-slate-100">
+                  <span className="text-[10px] text-slate-400 block font-medium">รายรับเดือนนี้</span>
+                  <span className="font-mono font-black text-emerald-600 text-xs">
+                    +฿{monthIncome.toFixed(0)}
+                  </span>
+                </div>
+                <div className="bg-slate-50/80 rounded-xl p-2 border border-slate-100">
+                  <span className="text-[10px] text-slate-400 block font-medium">รายจ่ายเดือนนี้</span>
+                  <span className="font-mono font-black text-rose-500 text-xs">
+                    -฿{monthExpense.toFixed(0)}
+                  </span>
+                </div>
+                <div className="bg-slate-50/80 rounded-xl p-2 border border-slate-100">
+                  <span className="text-[10px] text-slate-400 block font-medium">คงเหลือสุทธิ</span>
+                  <span className={`font-mono font-black text-xs ${monthBalance < 0 ? 'text-rose-500' : 'text-emerald-600'}`}>
+                    ฿{monthBalance.toFixed(0)}
+                  </span>
+                </div>
+              </div>
+              <p className="text-[10px] text-slate-400 text-center font-medium pt-0.5">
+                💡 เกณฑ์คุมงบเฉลี่ยวันละ ฿{dailyBenchmark.toFixed(2)} (ใช้เป็นเกณฑ์เปรียบเทียบ ส่วนงบเดือนนับตามรายรับจริง)
+              </p>
+            </div>
+          </main>
+
+          {/* Scanner Modal (Gemini Vision) */}
+          {showScanner && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+              <div className={`max-w-md w-full p-5 bg-white rounded-3xl shadow-2xl relative space-y-4 border-2 ${isBoy ? 'border-sky-200' : 'border-pink-200'}`}>
+                <button onClick={() => { setShowScanner(false); setParsedSlip(null); }} className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 font-bold">✕</button>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">📸</span>
+                  <h3 className="text-base font-black text-slate-800">สแกนสลิป / ใบเสร็จสินค้า</h3>
+                </div>
+
+                {!parsedSlip ? (
+                  isScanning ? (
+                    <div className="py-10 text-center space-y-2">
+                      <div className="text-4xl animate-bounce">🐽</div>
+                      <h4 className="text-sm font-bold text-slate-700">เศรษฐีหมูอ้วนกำลังเพ่งอ่านสลิป...</h4>
+                      <p className="text-xs text-slate-400">กำลังดึงชื่อร้าน ยอดเงิน และจัดหมวดหมู่อัตโนมัติ</p>
+                    </div>
+                  ) : (
+                    <div className="p-6 border-2 border-dashed border-pink-200 rounded-2xl text-center bg-pink-50/30 space-y-3">
+                      <div className="text-3xl">🧾</div>
+                      <p className="text-xs font-bold text-slate-600">อัปโหลดสลิปธนาคาร หรือใบเสร็จ 7-Eleven</p>
+                      <label className={`inline-block py-2.5 px-5 ${primaryBtnClass} text-xs font-bold cursor-pointer tap-bounce`}>
+                        <span>📁 เลือกรูปจากเครื่อง</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => e.target.files?.[0] && handleImageFile(e.target.files[0])}
+                        />
+                      </label>
+                    </div>
+                  )
+                ) : (
+                  <div className="space-y-3 animate-in zoom-in-95">
+                    {imagePreview && (
+                      <div className="max-h-28 overflow-hidden rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center">
+                        <img src={imagePreview} className="max-h-28 object-contain" />
+                      </div>
+                    )}
+                    {/* Type Toggle for Scanned Slip */}
+                    <div className="flex bg-slate-100 p-1 rounded-2xl gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setScanType('EXPENSE')}
+                        className={`flex-1 py-1.5 rounded-xl text-xs font-black transition-all ${
+                          scanType === 'EXPENSE' ? 'bg-rose-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                        }`}
+                      >
+                        🔴 รายจ่าย (โอนออก/ใบเสร็จ)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setScanType('INCOME')}
+                        className={`flex-1 py-1.5 rounded-xl text-xs font-black transition-all ${
+                          scanType === 'INCOME' ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                        }`}
+                      >
+                        🟢 รายรับ (เงินโอนเข้า)
+                      </button>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-500">
+                        {scanType === 'EXPENSE' ? 'ยอดเงินรายจ่าย (บาท)' : 'ยอดเงินรายรับ (บาท)'}
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        id="scan_amount"
+                        defaultValue={parsedSlip.amount}
+                        className={`w-full font-mono text-xl font-black bg-slate-50 border-2 rounded-xl px-3 py-2 outline-none ${
+                          scanType === 'EXPENSE' ? 'text-rose-500 border-rose-200' : 'text-emerald-500 border-emerald-200'
+                        }`}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-500">ชื่อร้านค้า / ผู้โอน / สินค้า</label>
+                      <input
+                        type="text"
+                        id="scan_merchant"
+                        defaultValue={parsedSlip.merchant}
+                        className="w-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-500">หมวดหมู่</label>
+                      <select
+                        id="scan_category"
+                        defaultValue={parsedSlip.suggestedCategory}
+                        className="w-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none"
+                      >
+                        {categories.map(c => <option key={c.id} value={c.name}>{c.icon} {c.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-500">บันทึกช่วยจำ</label>
+                      <input
+                        type="text"
+                        id="scan_note"
+                        defaultValue={parsedSlip.note}
+                        placeholder="เช่น มื้อเที่ยงกับเพื่อน"
+                        className="w-full text-xs text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none"
+                      />
+                    </div>
+
+                    <div className="flex gap-2 pt-2">
+                      <button
+                        onClick={() => { setShowScanner(false); setParsedSlip(null); }}
+                        className="flex-1 py-2.5 rounded-full bg-slate-100 text-slate-600 font-bold text-xs"
+                      >
+                        ยกเลิก
+                      </button>
+                      <button
+                        onClick={() => {
+                          const amt = parseFloat(document.getElementById('scan_amount').value) || 0;
+                          const mer = document.getElementById('scan_merchant').value || 'ไม่ระบุ';
+                          const cat = document.getElementById('scan_category').value;
+                          const not = document.getElementById('scan_note').value;
+
+                          handleSaveTransaction({
+                            id: `TXN-${Date.now()}`,
+                            date: selectedDate,
+                            time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+                            type: scanType,
+                            category: cat,
+                            amount: amt,
+                            wallet: parsedSlip.bank || 'KBank',
+                            merchant: mer,
+                            note: not,
+                            slipRef: parsedSlip.slipRef || '',
+                            isCategorized: true
+                          });
+                          setShowScanner(false);
+                          setParsedSlip(null);
+                        }}
+                        className={`flex-2 py-2.5 px-5 ${scanType === 'INCOME' ? 'bg-emerald-500 hover:bg-emerald-600 text-white rounded-full' : primaryBtnClass} text-xs font-black shadow-md`}
+                      >
+                        {scanType === 'INCOME' ? '💰 บันทึกรายรับเข้ากระปุก' : '💾 บันทึกลงกระปุกเศรษฐีหมูอ้วน'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Manual Add Modal */}
+          {showManualAdd && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+              <div className="max-w-sm w-full p-5 bg-white rounded-3xl shadow-2xl space-y-3.5 border-2 border-amber-200">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-black text-slate-800">➕ จดรายการด้วยตนเอง</h3>
+                  <button onClick={() => setShowManualAdd(false)} className="text-slate-400 hover:text-slate-700 font-bold">✕</button>
+                </div>
+
+                {/* Type Toggle: Expense vs Income */}
+                <div className="flex bg-slate-100 p-1 rounded-2xl gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setManualType('EXPENSE')}
+                    className={`flex-1 py-1.5 rounded-xl text-xs font-black transition-all ${
+                      manualType === 'EXPENSE' ? 'bg-rose-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    🔴 รายจ่าย
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setManualType('INCOME')}
+                    className={`flex-1 py-1.5 rounded-xl text-xs font-black transition-all ${
+                      manualType === 'INCOME' ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    🟢 รายรับ (นับเป็นงบเดือน)
+                  </button>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-slate-500">
+                    {manualType === 'EXPENSE' ? 'ยอดเงินรายจ่าย (บาท)' : 'ยอดเงินรายรับ (บาท)'}
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    id="manual_amount"
+                    placeholder="0.00"
+                    className={`w-full font-mono text-xl font-black bg-slate-50 border-2 rounded-xl px-3 py-2 outline-none ${
+                      manualType === 'EXPENSE' ? 'text-rose-500 border-rose-200' : 'text-emerald-500 border-emerald-200'
+                    }`}
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold text-slate-500">
+                    {manualType === 'EXPENSE' ? 'ชื่อสินค้า / ร้านค้า' : 'แหล่งที่มาของรายรับ'}
+                  </label>
+                  <input
+                    type="text"
+                    id="manual_merchant"
+                    placeholder={manualType === 'EXPENSE' ? 'เช่น ข้าวหมูกรอบ, ชาไข่มุก' : 'เช่น เงินเดือน, โบนัส, ขายของ'}
+                    className="w-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold text-slate-500">หมวดหมู่</label>
+                  <select
+                    id="manual_category"
+                    defaultValue={manualType === 'INCOME' ? 'เงินเดือน & รายรับ' : 'อาหารและเครื่องดื่ม'}
+                    className="w-full text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 outline-none"
+                  >
+                    {categories.map(c => <option key={c.id} value={c.name}>{c.icon} {c.name}</option>)}
+                  </select>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <button onClick={() => setShowManualAdd(false)} className="flex-1 py-2.5 rounded-full bg-slate-100 text-slate-600 font-bold text-xs">
+                    ยกเลิก
+                  </button>
+                  <button
+                    onClick={() => {
+                      const amt = parseFloat(document.getElementById('manual_amount').value) || 0;
+                      const mer = document.getElementById('manual_merchant').value || (manualType === 'INCOME' ? 'รายรับ' : 'ไม่ระบุ');
+                      const cat = document.getElementById('manual_category').value;
+
+                      handleSaveTransaction({
+                        id: `TXN-${Date.now()}`,
+                        date: selectedDate,
+                        time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+                        type: manualType,
+                        category: cat,
+                        amount: amt,
+                        wallet: 'เงินสด',
+                        merchant: mer,
+                        note: 'จดด้วยตนเอง',
+                        isCategorized: true
+                      });
+                      setShowManualAdd(false);
+                    }}
+                    className={`flex-1 py-2.5 ${manualType === 'INCOME' ? 'bg-emerald-500 hover:bg-emerald-600 text-white rounded-full' : 'btn-candy-yellow'} text-xs font-black shadow-md`}
+                  >
+                    {manualType === 'INCOME' ? '💰 บันทึกรายรับ' : '💾 บันทึกรายจ่าย'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Settings Modal */}
+          {showSettings && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+              <div className="max-w-sm w-full p-5 bg-white rounded-3xl shadow-2xl space-y-3.5 border-2 border-slate-200 text-xs">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-black text-slate-800">⚙️ ตั้งค่า เศรษฐีหมูอ้วน</h3>
+                  <button onClick={() => setShowSettings(false)} className="text-slate-400 font-bold">✕</button>
+                </div>
+                <div>
+                  <label className="font-bold text-slate-600 block mb-1">Gemini API Key (สำหรับสแกนสลิป)</label>
+                  <input
+                    type="password"
+                    id="cfg_key"
+                    defaultValue={settings.geminiApiKey}
+                    placeholder="AIzaSy..."
+                    className="w-full font-mono bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 outline-none"
+                  />
+                  <a href="https://aistudio.google.com/app/apikey" target="_blank" className="text-[10px] text-pink-500 underline mt-0.5 inline-block font-bold">
+                    รับ Gemini API Key ฟรีจาก Google AI Studio
+                  </a>
+                </div>
+                <div>
+                  <label className="font-bold text-slate-600 block mb-1">Google Apps Script Web App URL</label>
+                  <input
+                    type="url"
+                    id="cfg_url"
+                    defaultValue={settings.googleAppsScriptUrl}
+                    placeholder="https://script.google.com/macros/s/.../exec"
+                    className="w-full font-mono bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 outline-none"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-0.5">ใช้ Code.gs ในโฟลเดอร์โปรเจกต์นี้</p>
+                </div>
+                <div>
+                  <label className="font-bold text-slate-600 block mb-1">เกณฑ์กำหนดรายวัน (บาท/วัน)</label>
+                  <input
+                    type="number"
+                    id="cfg_daily_budget"
+                    defaultValue={settings.dailyBudget}
+                    className="w-full font-bold bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 outline-none"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    📌 เกณฑ์รายวันเป็นเป้าหมายอ้างอิงเปรียบเทียบ ส่วนงบรายเดือนจะนับรวมตามยอดรายรับจริงอัตโนมัติ
+                  </p>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <button onClick={() => setShowSettings(false)} className="flex-1 py-2.5 rounded-full bg-slate-100 text-slate-600 font-bold">
+                    ปิด
+                  </button>
+                  <button
+                    onClick={() => {
+                      const k = document.getElementById('cfg_key').value.trim();
+                      const u = document.getElementById('cfg_url').value.trim();
+                      const db = parseFloat(document.getElementById('cfg_daily_budget').value) || 600;
+
+                      setSettings(prev => ({
+                        ...prev,
+                        geminiApiKey: k,
+                        googleAppsScriptUrl: u,
+                        dailyBudget: db
+                      }));
+                      setShowSettings(false);
+                      alert('บันทึกการตั้งค่าเรียบร้อยแล้วอู๊ด!');
+                    }}
+                    className={`flex-1 py-2.5 ${primaryBtnClass} text-xs font-black shadow-md`}
+                  >
+                    บันทึก
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

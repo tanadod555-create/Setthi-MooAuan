@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Production build
+dist/
+
+# Test / Browser artifacts
+.playwright-mcp/
+*.log
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
