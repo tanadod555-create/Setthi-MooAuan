@@ -412,15 +412,7 @@
         } else if (u === 'manow' && p === 'manow') {
           onLogin({ username: 'manow', name: 'มะนาว (Manow)', theme: 'manow', isBoy: false });
         } else {
-          setErrorMsg('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง (ลองใช้ maxnum / maxnum หรือ manow / manow นะอู๊ด)');
-        }
-      };
-
-      const handleQuickLogin = (userKey) => {
-        if (userKey === 'maxnum') {
-          onLogin({ username: 'maxnum', name: 'แม็กนั่ม (Maxnum)', theme: 'maxnum', isBoy: true });
-        } else {
-          onLogin({ username: 'manow', name: 'มะนาว (Manow)', theme: 'manow', isBoy: false });
+          setErrorMsg('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
         }
       };
 
@@ -442,12 +434,6 @@
                 <span>🐷</span>
                 <span>เศรษฐีหมูอ้วน</span>
               </h2>
-              <p className="text-xs text-slate-500 font-bold mt-1">
-                เข้าสู่ระบบส่วนตัว (Private Account)
-              </p>
-              <p className="text-[11px] text-slate-400">
-                ข้อมูลรายรับรายจ่ายจะถูกแยกเก็บเป็นส่วนตัว 100%
-              </p>
             </div>
 
             {errorMsg && (
@@ -456,14 +442,14 @@
               </div>
             )}
 
-            <form onSubmit={handleLoginSubmit} className="space-y-3 text-left">
+            <form onSubmit={handleLoginSubmit} className="space-y-3.5 text-left">
               <div>
                 <label className="text-xs font-bold text-slate-600 block mb-1">ชื่อผู้ใช้ (Username)</label>
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="maxnum หรือ manow"
+                  placeholder="กรอกชื่อผู้ใช้"
                   className="w-full text-xs font-bold bg-slate-50 border-2 border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:border-pink-400"
                   required
                 />
@@ -475,7 +461,7 @@
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="รหัสผ่าน"
+                  placeholder="กรอกรหัสผ่าน"
                   className="w-full text-xs font-mono bg-slate-50 border-2 border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:border-pink-400"
                   required
                 />
@@ -483,33 +469,11 @@
 
               <button
                 type="submit"
-                className="w-full py-3 btn-candy-pink text-sm font-black shadow-md mt-1"
+                className="w-full py-3 btn-candy-pink text-sm font-black shadow-md mt-2"
               >
                 🔐 เข้าสู่ระบบ
               </button>
             </form>
-
-            <div className="pt-2 border-t border-slate-100">
-              <span className="text-[11px] font-bold text-slate-400 block mb-2">⚡ เข้าสู่ระบบด่วนในคลิกเดียว:</span>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('maxnum')}
-                  className="py-2.5 px-3 btn-candy-blue text-xs font-black shadow-sm flex items-center justify-center gap-1"
-                >
-                  <span>🏋️‍♂️</span>
-                  <span>แม็กนั่ม</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('manow')}
-                  className="py-2.5 px-3 btn-candy-pink text-xs font-black shadow-sm flex items-center justify-center gap-1"
-                >
-                  <span>🌸</span>
-                  <span>มะนาว</span>
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       );
@@ -1065,7 +1029,7 @@
                       {currentUser.name}
                     </span>
                   </div>
-                  <p className="text-[10px] text-slate-400 font-medium">บันทึกสินค้า & สลิปอัจฉริยะ (ส่วนตัว)</p>
+                  <p className="text-[10px] text-slate-400 font-medium">บันทึกสินค้า & สลิปอัจฉริยะ</p>
                 </div>
               </div>
 
